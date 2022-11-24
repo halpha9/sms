@@ -3,6 +3,7 @@ import type { AppProps } from "next/app";
 import SessionProvider from "../providers/session";
 import { Amplify } from "aws-amplify";
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
+import Layout from "../components/layout";
 
 Amplify.configure({
   aws_project_region: process.env.NEXT_PUBLIC_COGNITO_REGION!,
@@ -22,11 +23,13 @@ const client = new ApolloClient({
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <SessionProvider>
-      <ApolloProvider client={client}>
-        <Component {...pageProps} />
-      </ApolloProvider>
-    </SessionProvider>
+    <Layout>
+      <SessionProvider>
+        <ApolloProvider client={client}>
+          <Component {...pageProps} />
+        </ApolloProvider>
+      </SessionProvider>
+    </Layout>
   );
 }
 
