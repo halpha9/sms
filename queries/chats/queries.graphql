@@ -1,0 +1,11 @@
+query getChatSessions {
+  chat_session {
+    ...ChatSession
+  }
+}
+
+query getChatSession($id: uuid!) {
+  chatSession: chat_session_by_pk(id: $id) {
+    ...ChatSession
+  }
+}

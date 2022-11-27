@@ -1,0 +1,40 @@
+fragment ChatSession on chat_session {
+  id
+  created_at
+  updated_at
+  members {
+    id
+    user_id
+    user {
+      id
+      first_name
+      last_name
+      email
+    }
+    messages: messages_sent {
+      id
+      created_at
+      updated_at
+      from_id
+      to_id
+      text
+    }
+  }
+  messages {
+    id
+    created_at
+    updated_at
+    from_id
+    to_id
+    text
+  }
+}
+
+fragment Message on message {
+  id
+  created_at
+  updated_at
+  from_id
+  to_id
+  text
+}

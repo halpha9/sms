@@ -1,14 +1,10 @@
 import { CognitoUser, ISignUpResult } from "amazon-cognito-identity-js";
 import { Auth } from "aws-amplify";
-import {
-  ApolloClient,
-  ApolloProvider,
-  NormalizedCacheObject,
-} from "@apollo/client";
+import { GraphQLClient } from "graphql-request";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useGetUserByIdQuery, useGetUserQuery, User } from "../queries";
 
 interface State {
-  client?: ApolloClient<NormalizedCacheObject> | null;
   role?: string;
   token?: string;
   loading: boolean;
@@ -23,6 +19,8 @@ export interface ExtendedUser extends CognitoUser {
 }
 
 export interface SessionContextValue extends State {
+  client: GraphQLClient;
+  userData?: User;
   signUp: (
     username: string,
     password: string
@@ -54,6 +52,7 @@ export const SessionContext = createContext(
 
 type SessionProps = {
   children: React.ReactNode;
+  client: GraphQLClient;
 };
 
 const currentUser = async () => {
@@ -78,7 +77,7 @@ const currentUser = async () => {
       role: claims && claims["x-hasura-role"],
     };
 
-    return userData;
+    return { userData };
   } catch (err) {
     console.log("User not authenticated", err);
     if (window.location.pathname !== "/sign-in") {
@@ -88,27 +87,45 @@ const currentUser = async () => {
   }
 };
 
-function SP({ children }: SessionProps) {
+function SP({ children, client }: SessionProps) {
   const [state, setState] = useState<State>(initialState);
 
-  useEffect(() => {
-    async function start() {
-      const userData = await currentUser();
-      // @ts-ignore
-      if (userData) {
-        setState((s) => ({
-          ...s,
-          ...userData,
-        }));
-      } else {
-        setState((s) => ({
-          ...s,
-          loading: false,
-        }));
-      }
+  const { data, isLoading } = useGetUserByIdQuery(
+    client,
+    {
+      id: state.claims && state.claims["x-hasura-user-id"],
+    },
+    {
+      enabled: !!(state.claims && state.claims["x-hasura-user-id"]),
+      onSuccess: (d: any) => {
+        console.log("loaded user", d);
+        setState((s) => ({ ...s, loading: false }));
+      },
     }
+  );
 
-    start().catch(console.error);
+  useEffect(() => {
+    currentUser()
+      .then((res) => {
+        const complete =
+          res.userData?.claims && res.userData?.claims["x-hasura-user-id"];
+        setState((s) => ({
+          ...s,
+          loading: complete ? true : false,
+          ...res.userData,
+        }));
+        console.log(res.userData?.token);
+        // client.setHeader("Authorization", `Bearer ${res.userData?.token}`);
+        client.setHeader(
+          "x-hasura-admin-secret",
+          process.env.NEXT_PUBLIC_HASURA_ADMIN_SECRET!
+        );
+        setTimeout(() => 1000);
+      })
+      .catch(() => {
+        setState((s) => ({ ...s, loading: false }));
+        setTimeout(() => 1000);
+      });
   }, []);
 
   const signUp = async (username: string, password: string) => {
@@ -133,10 +150,11 @@ function SP({ children }: SessionProps) {
   const signIn = async (username: string, password: string) => {
     try {
       const result = await Auth.signIn(username, password);
-      const userData = await currentUser();
+      const res = await currentUser();
+      client.setHeader("Authorization", `Bearer ${res.userData?.token}`);
       setState((s) => ({
         ...s,
-        ...userData,
+        ...res.userData,
       }));
       return result;
     } catch (error) {
@@ -144,9 +162,17 @@ function SP({ children }: SessionProps) {
     }
   };
 
-  const signOut = async (navigation?: any) => {
+  const signOut = async () => {
     try {
       await Auth.signOut({ global: true });
+      setState((s) => ({
+        ...s,
+        user: undefined,
+        token: undefined,
+        role: undefined,
+        claims: undefined,
+      }));
+      client.setHeader("Authorization", "");
       setState((s) => ({
         ...s,
         user: undefined,
@@ -196,6 +222,9 @@ function SP({ children }: SessionProps) {
 
   const value = {
     ...state,
+    loading: state.loading || isLoading,
+    client,
+    userData: data && (data.user as User),
     signUp,
     signIn,
     signOut,
@@ -204,8 +233,12 @@ function SP({ children }: SessionProps) {
     updateAttributes,
   };
 
+  // if (state.loading) {
+  //   return null;
+  // }
+
   return (
-    // @ts-ignore
+    //@ts-ignore
     <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
   );
 }

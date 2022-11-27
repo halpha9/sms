@@ -1,0 +1,5 @@
+subscription addToChatSession($id: uuid!) {
+  chat_session_by_pk(id: $id) {
+    ...ChatSession
+  }
+}

@@ -2,8 +2,10 @@ import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import SessionProvider from "../providers/session";
 import { Amplify } from "aws-amplify";
-import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import Layout from "../components/layout";
+import graphQLClient from "../utils/graphql-fetcher";
+import { GraphQLClientProvider } from "../providers/graphql-client";
+import { Hydrate } from "@tanstack/react-query";
 
 Amplify.configure({
   aws_project_region: process.env.NEXT_PUBLIC_COGNITO_REGION!,
@@ -13,23 +15,19 @@ Amplify.configure({
   aws_user_pools_web_client_id: process.env.NEXT_PUBLIC_CLIENT_ID!,
 });
 
-const client = new ApolloClient({
-  uri: process.env.HASURA_GRAPHQL_URL!,
-  cache: new InMemoryCache(),
-  headers: {
-    "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
-  },
-});
+const client = graphQLClient;
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <Layout>
-      <SessionProvider>
-        <ApolloProvider client={client}>
-          <Component {...pageProps} />
-        </ApolloProvider>
-      </SessionProvider>
-    </Layout>
+    <GraphQLClientProvider client={client}>
+      <Hydrate state={pageProps.dehydratedState}>
+        <SessionProvider client={client}>
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </SessionProvider>
+      </Hydrate>
+    </GraphQLClientProvider>
   );
 }
 

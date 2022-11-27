@@ -11,7 +11,7 @@ type FormType = {
 };
 
 type State = {
-  error: string | null;
+  error: string | undefined;
   loading: boolean;
   forgot: boolean;
   reset: boolean;
@@ -23,7 +23,7 @@ const SignIn = () => {
   const session = useSession();
   const [state, setState] = useState<State>({
     loading: false,
-    error: null,
+    error: undefined,
     forgot: false,
     reset: false,
     register: false,
@@ -53,11 +53,15 @@ const SignIn = () => {
 
   const handleRegister = async (data: FormType) => {
     const { username, password } = data;
-    setState((s) => ({ ...s, error: null, loading: true }));
+    setState((s) => ({ ...s, error: undefined, loading: true }));
     try {
       await Auth.signUp(username, password);
     } catch (error) {
-      setState({ ...state, loading: false, error: error.message });
+      let errorMessage;
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      setState({ ...state, loading: false, error: errorMessage });
     }
   };
 
@@ -65,22 +69,30 @@ const SignIn = () => {
     const { username } = data;
 
     try {
-      setState((s) => ({ ...s, error: null, loading: true }));
+      setState((s) => ({ ...s, error: undefined, loading: true }));
       await session.forgotPassword(username);
       setState((s) => ({ ...s, loading: false, forgot: false, reset: true }));
     } catch (error) {
-      setState((s) => ({ ...s, error: error.message, loading: false }));
+      let errorMessage;
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      setState({ ...state, loading: false, error: errorMessage });
     }
   };
 
   const resetPassword = async (data: FormType) => {
     const { username, password, code } = data;
     try {
-      setState((s) => ({ ...s, error: null, loading: true }));
+      setState((s) => ({ ...s, error: undefined, loading: true }));
       await session.resetPassword(username, code!, password);
       setState((s) => ({ ...s, loading: false, forgot: false, reset: false }));
     } catch (error) {
-      setState((s) => ({ ...s, error: error.message, loading: false }));
+      let errorMessage;
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      setState({ ...state, loading: false, error: errorMessage });
     }
   };
 
