@@ -6,6 +6,7 @@ import Layout from "../components/layout";
 import graphQLClient from "../utils/graphql-fetcher";
 import { GraphQLClientProvider } from "../providers/graphql-client";
 import { Hydrate } from "@tanstack/react-query";
+import ToastProvider from "providers/toast";
 
 Amplify.configure({
   aws_project_region: process.env.NEXT_PUBLIC_COGNITO_REGION!,
@@ -21,11 +22,13 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <GraphQLClientProvider client={client}>
       <Hydrate state={pageProps.dehydratedState}>
-        <SessionProvider client={client}>
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
-        </SessionProvider>
+        <ToastProvider>
+          <SessionProvider client={client}>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </SessionProvider>
+        </ToastProvider>
       </Hydrate>
     </GraphQLClientProvider>
   );

@@ -1695,6 +1695,20 @@ export type UserFragment = (
   & { __typename?: 'user' }
 );
 
+export type EditUserMutationVariables = Exact<{
+  id: Scalars['uuid'];
+  data: User_Set_Input;
+}>;
+
+
+export type EditUserMutation = (
+  { update_user_by_pk?: (
+    { id: any, created_at: any, first_name: string, last_name: string, email?: string | null }
+    & { __typename?: 'user' }
+  ) | null }
+  & { __typename?: 'mutation_root' }
+);
+
 export type GetUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1712,7 +1726,7 @@ export type GetUserByIdQueryVariables = Exact<{
 
 
 export type GetUserByIdQuery = (
-  { user_by_pk?: (
+  { user?: (
     { id: any, created_at: any, first_name: string, last_name: string, email?: string | null }
     & { __typename?: 'user' }
   ) | null }
@@ -1868,6 +1882,27 @@ export const AddToChatSessionDocument = `
   }
 }
     ${ChatSessionFragment}`;
+export const EditUserDocument = `
+    mutation editUser($id: uuid!, $data: user_set_input!) {
+  update_user_by_pk(pk_columns: {id: $id}, _set: $data) {
+    ...User
+  }
+}
+    ${UserFragment}`;
+export const useEditUserMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(
+      client: GraphQLClient,
+      options?: UseMutationOptions<EditUserMutation, TError, EditUserMutationVariables, TContext>,
+      headers?: RequestInit['headers']
+    ) =>
+    useMutation<EditUserMutation, TError, EditUserMutationVariables, TContext>(
+      ['editUser'],
+      (variables?: EditUserMutationVariables) => fetcher<EditUserMutation, EditUserMutationVariables>(client, EditUserDocument, variables, headers)(),
+      options
+    );
+useEditUserMutation.fetcher = (client: GraphQLClient, variables: EditUserMutationVariables, headers?: RequestInit['headers']) => fetcher<EditUserMutation, EditUserMutationVariables>(client, EditUserDocument, variables, headers);
 export const GetUserDocument = `
     query getUser {
   user {
@@ -1893,8 +1928,8 @@ useGetUserQuery.document = GetUserDocument;
 
 useGetUserQuery.fetcher = (client: GraphQLClient, variables?: GetUserQueryVariables, headers?: RequestInit['headers']) => fetcher<GetUserQuery, GetUserQueryVariables>(client, GetUserDocument, variables, headers);
 export const GetUserByIdDocument = `
-    query getUserByID($id: uuid!) {
-  user_by_pk(id: $id) {
+    query getUserById($id: uuid!) {
+  user: user_by_pk(id: $id) {
     ...User
   }
 }
@@ -1909,7 +1944,7 @@ export const useGetUserByIdQuery = <
       headers?: RequestInit['headers']
     ) =>
     useQuery<GetUserByIdQuery, TError, TData>(
-      ['getUserByID', variables],
+      ['getUserById', variables],
       fetcher<GetUserByIdQuery, GetUserByIdQueryVariables>(client, GetUserByIdDocument, variables, headers),
       options
     );

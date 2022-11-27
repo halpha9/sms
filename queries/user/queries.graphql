@@ -4,8 +4,8 @@ query getUser {
   }
 }
 
-query getUserByID($id: uuid!) {
-  user_by_pk(id: $id) {
+query getUserById($id: uuid!) {
+  user: user_by_pk(id: $id) {
     ...User
   }
 }
