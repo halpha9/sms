@@ -1,16 +1,15 @@
-import { QueryClientProvider } from '@tanstack/react-query';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { GraphQLClient } from 'graphql-request';
 import React from 'react';
 
-type Props = {
+interface Props {
   children: React.ReactNode;
   client: GraphQLClient;
-};
+}
 
-export type GraphQLClientState = {
+export interface GraphQLClientState {
   graphQLClient: GraphQLClient;
-};
+}
 
 export type GraphQLClientProviderState = GraphQLClientState | null;
 

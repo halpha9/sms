@@ -1,56 +1,56 @@
-import { CameraIcon, PlusIcon } from "@heroicons/react/24/outline";
-import { useToast } from "providers/toast";
-import React from "react";
-import { useForm } from "react-hook-form";
-import Spinner from "../../components/spinner";
-import { useSession } from "../../providers/session";
-import { useEditUserMutation, useGetUserByIdQuery } from "../../queries";
+import { PlusIcon } from '@heroicons/react/24/outline';
+import { useToast } from 'providers/toast';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import Spinner from '../../components/spinner';
+import { useSession } from '../../providers/session';
+import { useEditUserMutation, useGetUserByIdQuery } from '../../queries';
 
-type FormType = {
+interface FormType {
   first_name: string;
   last_name: string;
   email: string;
-};
+}
 
-type State = {
+interface State {
   loading: boolean;
   error: string | undefined;
   edit: boolean;
-};
+}
 
 function Profile() {
-  const { client, claims, loading } = useSession();
+  const { client, claims } = useSession();
   const { setToast } = useToast();
   const [state, setState] = React.useState<State>({
     loading: true,
     error: undefined,
-    edit: false,
+    edit: false
   });
 
   const updateUser = useEditUserMutation(client);
   const { data, isLoading } = useGetUserByIdQuery(
     client,
     {
-      id: claims && claims!["x-hasura-user-id"],
+      id: claims && claims['x-hasura-user-id']
     },
     {
-      enabled: !!(claims && claims["x-hasura-user-id"]),
+      enabled: !!(claims && claims['x-hasura-user-id'])
     }
   );
 
   const { register, handleSubmit } = useForm<FormType>({
-    mode: "all",
-    reValidateMode: "onChange",
+    mode: 'all',
+    reValidateMode: 'onChange',
     defaultValues: {
-      email: (data && data.user?.email) || "",
-      first_name: (data && data.user?.first_name) || "",
-      last_name: (data && data.user?.last_name) || "",
-    },
+      email: (data && data.user?.email) || '',
+      first_name: (data && data.user?.first_name) || '',
+      last_name: (data && data.user?.last_name) || ''
+    }
   });
 
   const action = async (info: FormType) => {
     if (!state.edit) {
-      setState((s) => ({ ...s, edit: true }));
+      setState(s => ({ ...s, edit: true }));
     } else if (state.edit) {
       await saveChanges(info);
     }
@@ -59,34 +59,34 @@ function Profile() {
   const saveChanges = async (info: FormType) => {
     const { email, first_name, last_name } = info;
     const payload = {
-      id: claims && claims!["x-hasura-user-id"],
+      id: claims && claims['x-hasura-user-id'],
       data: {
         first_name,
         last_name,
-        email,
-      },
+        email
+      }
     };
     try {
       const res = await updateUser.mutateAsync(payload);
-      setState((s) => ({ ...s, edit: false }));
+      setState(s => ({ ...s, edit: false }));
       if (res) {
         setToast(true, {
-          type: "success",
-          title: "Profile Updated",
-          message: "",
+          type: 'success',
+          title: 'Profile Updated',
+          message: ''
         });
       }
     } catch (err) {
       console.log(err);
       setToast(true, {
-        type: "error",
-        title: "Error Updating Profile",
-        message: err.message,
+        type: 'error',
+        title: 'Error Updating Profile',
+        message: err.message
       });
     }
   };
 
-  const actionText = state.edit ? "Save Changes" : "Edit Profile";
+  const actionText = state.edit ? 'Save Changes' : 'Edit Profile';
   return (
     <>
       {!isLoading && data ? (
@@ -103,35 +103,32 @@ function Profile() {
               <input
                 disabled={!state.edit}
                 type="text"
-                {...register("first_name")}
+                {...register('first_name')}
                 className="appearance-none block w-full px-3 py-2 border border-slate-300 bg-slate-700 rounded-md shadow-sm placeholder-slate-400 text-slate-300  focus:outline-none focus:ring-slate-500 focus:border-slate-500"
               />
               <input
                 disabled={!state.edit}
                 type="text"
-                {...register("last_name")}
+                {...register('last_name')}
                 className="appearance-none block w-full px-3 py-2 border border-slate-300 bg-slate-700 rounded-md shadow-sm placeholder-slate-400 text-slate-300 focus:outline-none focus:ring-slate-500 focus:border-slate-500"
               />
               <input
                 disabled={!state.edit}
                 type="text"
-                {...register("email")}
+                {...register('email')}
                 className="appearance-none block w-full px-3 py-2 border border-slate-300 bg-slate-700 rounded-md shadow-sm placeholder-slate-400 text-slate-300 focus:outline-none focus:ring-slate-500 focus:border-slate-500"
               />
             </div>
             <div className="flex space-x-6 py-8">
               {state.edit && (
                 <button
-                  onClick={() => setState((s) => ({ ...s, edit: false }))}
+                  onClick={() => setState(s => ({ ...s, edit: false }))}
                   className="rounded-lg bg-slate-600 p-2 px-6 text-red-600"
                 >
                   Cancel
                 </button>
               )}
-              <button
-                onClick={handleSubmit(action)}
-                className="rounded-lg bg-slate-700 p-2 px-6 text-slate-400"
-              >
+              <button onClick={handleSubmit(action)} className="rounded-lg bg-slate-700 p-2 px-6 text-slate-400">
                 {actionText}
               </button>
             </div>

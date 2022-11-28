@@ -1,65 +1,61 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./pages/**/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-    "./app/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ['./pages/**/**/*.{js,ts,jsx,tsx}', './components/**/*.{js,ts,jsx,tsx}', './app/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       fontFamily: {
-        serif: ["Georgia", "Cambria", "Times New Roman", "Times", "serif"],
+        serif: ['Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
         heading: [
-          "Poppins",
-          "system-ui",
-          "-apple-system",
-          "BlinkMacSystemFont",
+          'Poppins',
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
           '"Segoe UI"',
-          "Roboto",
+          'Roboto',
           '"Helvetica Neue"',
-          "Arial",
+          'Arial',
           '"Noto Sans"',
-          "sans-serif",
+          'sans-serif',
           '"Apple Color Emoji"',
           '"Segoe UI Emoji"',
           '"Segoe UI Symbol"',
-          '"Noto Color Emoji"',
+          '"Noto Color Emoji"'
         ],
         sans: [
           // "IBM Plex Sans",
           // "Lato",
-          "Poppins",
-          "system-ui",
-          "-apple-system",
-          "BlinkMacSystemFont",
+          'Poppins',
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
           '"Segoe UI"',
-          "Roboto",
+          'Roboto',
           '"Helvetica Neue"',
-          "Arial",
+          'Arial',
           '"Noto Sans"',
-          "sans-serif",
+          'sans-serif',
           '"Apple Color Emoji"',
           '"Segoe UI Emoji"',
           '"Segoe UI Symbol"',
-          '"Noto Color Emoji"',
-        ],
+          '"Noto Color Emoji"'
+        ]
       },
-      typography: (theme) => {
+      typography: theme => {
         return {
           default: {
             css: {
-              color: "#333",
+              color: '#333',
               a: {
-                color: theme("colors.purple.400"),
-                "&:hover": {
-                  color: theme("colors.purple.700"),
-                },
-              },
-            },
-          },
+                color: theme('colors.purple.400'),
+                '&:hover': {
+                  color: theme('colors.purple.700')
+                }
+              }
+            }
+          }
         };
-      },
-    },
+      }
+    }
   },
-  plugins: [],
+  plugins: []
 };

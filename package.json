@@ -5,7 +5,12 @@
     "build": "next build",
     "start": "next start",
     "generate": "DOTENV_CONFIG_PATH=./.env graphql-codegen -r dotenv/config --config codegen.js",
-    "generate:watch": "yarn generate --watch"
+    "generate:watch": "yarn generate --watch",
+    "format:check": "prettier . --ignore-path .gitignore --check",
+    "format:fix": "prettier . --ignore-path .gitignore --write",
+    "lint": "next lint",
+    "typecheck": "tsc -p tsconfig.json",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@apollo/client": "^3.7.1",
@@ -40,9 +45,29 @@
     "@types/node": "18.11.3",
     "@types/react": "18.0.21",
     "@types/react-dom": "18.0.6",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.44.0",
     "autoprefixer": "^10.4.12",
+    "eslint": "^8.0.1",
+    "eslint-config-next": "^13.0.5",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-standard-with-typescript": "^23.0.0",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-n": "^15.0.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "eslint-plugin-react": "^7.31.11",
+    "eslint-plugin-security": "^1.5.0",
+    "husky": "^8.0.2",
+    "lint-staged": "^13.0.4",
     "postcss": "^8.4.18",
+    "prettier": "^2.8.0",
     "tailwindcss": "^3.2.1",
-    "typescript": "^4.9.3"
-  }
+    "typescript": "*"
+  },
+  "name": "sms",
+  "version": "1.0.0",
+  "main": "pages/index.ts",
+  "repository": "https://github.com/halpha9/sms.git",
+  "author": "halpha9 <harryalpha@hotmail.co.uk>",
+  "license": "MIT"
 }

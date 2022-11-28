@@ -1,19 +1,18 @@
-import Link from "next/link";
-import React from "react";
-import { useForm } from "react-hook-form";
+import Link from 'next/link';
+import React, { Fragment } from 'react';
+import { useForm } from 'react-hook-form';
 import {
   ArrowLeftOnRectangleIcon,
   ArrowRightOnRectangleIcon,
   ChatBubbleLeftEllipsisIcon,
   MagnifyingGlassIcon,
-  UserIcon,
-} from "@heroicons/react/24/outline";
-import { useSession } from "../providers/session";
-import { Menu, Transition } from "@headlessui/react";
-import { Fragment } from "react";
+  UserIcon
+} from '@heroicons/react/24/outline';
+import { useSession } from '../providers/session';
+import { Menu, Transition } from '@headlessui/react';
 
 function NavBar() {
-  const { register } = useForm({ mode: "all", reValidateMode: "onChange" });
+  const { register } = useForm({ mode: 'all', reValidateMode: 'onChange' });
   const { signOut } = useSession();
 
   const handleLogout = async () => {
@@ -37,7 +36,7 @@ function NavBar() {
           <input
             className="bg-slate-700 p-2 rounded-md text-slate-400 text-sm px-4"
             placeholder="Search"
-            {...register("search")}
+            {...register('search')}
           />
           <MagnifyingGlassIcon className="text-slate-400 w-7 h-7" />
         </div>
@@ -62,21 +61,13 @@ function NavBar() {
                       {({ active }) => (
                         <button
                           className={`${
-                            active
-                              ? "bg-slate-600 text-slate-100"
-                              : "text-white"
+                            active ? 'bg-slate-600 text-slate-100' : 'text-white'
                           } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                         >
                           {active ? (
-                            <UserIcon
-                              className="mr-2 h-5 w-5 text-slate-400"
-                              aria-hidden="true"
-                            />
+                            <UserIcon className="mr-2 h-5 w-5 text-slate-400" aria-hidden="true" />
                           ) : (
-                            <UserIcon
-                              className="mr-2 h-5 w-5 text-slate-400"
-                              aria-hidden="true"
-                            />
+                            <UserIcon className="mr-2 h-5 w-5 text-slate-400" aria-hidden="true" />
                           )}
                           Profile
                         </button>
@@ -90,19 +81,13 @@ function NavBar() {
                       <button
                         onClick={handleLogout}
                         className={`${
-                          active ? "bg-slate-600 text-slate-100" : "text-white"
+                          active ? 'bg-slate-600 text-slate-100' : 'text-white'
                         } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                       >
                         {active ? (
-                          <ArrowRightOnRectangleIcon
-                            className="mr-2 h-5 w-5 text-slate-400"
-                            aria-hidden="true"
-                          />
+                          <ArrowRightOnRectangleIcon className="mr-2 h-5 w-5 text-slate-400" aria-hidden="true" />
                         ) : (
-                          <ArrowLeftOnRectangleIcon
-                            className="mr-2 h-5 w-5 text-slate-400"
-                            aria-hidden="true"
-                          />
+                          <ArrowLeftOnRectangleIcon className="mr-2 h-5 w-5 text-slate-400" aria-hidden="true" />
                         )}
                         Logout
                       </button>

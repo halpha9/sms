@@ -1,8 +1,8 @@
-import { CognitoUser, ISignUpResult } from "amazon-cognito-identity-js";
-import { Auth } from "aws-amplify";
-import { GraphQLClient } from "graphql-request";
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { useGetUserByIdQuery, useGetUserQuery, User } from "../queries";
+import { CognitoUser, ISignUpResult } from 'amazon-cognito-identity-js';
+import { Auth } from 'aws-amplify';
+import { GraphQLClient } from 'graphql-request';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useGetUserByIdQuery, User } from '../queries';
 
 interface State {
   role?: string;
@@ -21,39 +21,24 @@ export interface ExtendedUser extends CognitoUser {
 export interface SessionContextValue extends State {
   client: GraphQLClient;
   userData?: User;
-  signUp: (
-    username: string,
-    password: string
-  ) => Promise<ISignUpResult | undefined>;
-  signIn: (
-    username: string,
-    password: string
-  ) => Promise<{ [key: string]: string }>;
+  signUp: (username: string, password: string) => Promise<ISignUpResult | undefined>;
+  signIn: (username: string, password: string) => Promise<{ [key: string]: string }>;
   signOut: (navigation?: any) => Promise<void>;
   forgotPassword: (email: string) => Promise<any>;
-  resetPassword: (
-    email: string,
-    code: string,
-    password: string
-  ) => Promise<string>;
-  updateAttributes: (
-    user: CognitoUser,
-    attributes: { [key: string]: string }
-  ) => Promise<string>;
+  resetPassword: (email: string, code: string, password: string) => Promise<string>;
+  updateAttributes: (user: CognitoUser, attributes: { [key: string]: string }) => Promise<string>;
 }
 
 const initialState: State = {
-  loading: true,
+  loading: true
 };
 
-export const SessionContext = createContext(
-  initialState as SessionContextValue
-);
+export const SessionContext = createContext(initialState as SessionContextValue);
 
-type SessionProps = {
+interface SessionProps {
   children: React.ReactNode;
   client: GraphQLClient;
-};
+}
 
 const currentUser = async () => {
   try {
@@ -64,8 +49,8 @@ const currentUser = async () => {
     const { idToken } = data.signInUserSession;
 
     const claims =
-      idToken.payload && idToken.payload["https://hasura.io/jwt/claims"]
-        ? JSON.parse(idToken.payload["https://hasura.io/jwt/claims"])
+      idToken.payload && idToken.payload['https://hasura.io/jwt/claims']
+        ? JSON.parse(idToken.payload['https://hasura.io/jwt/claims'])
         : {};
 
     const token = idToken.jwtToken;
@@ -74,14 +59,14 @@ const currentUser = async () => {
       user: data,
       claims,
       token,
-      role: claims && claims["x-hasura-role"],
+      role: claims && claims['x-hasura-role']
     };
 
     return { userData };
   } catch (err) {
-    console.log("User not authenticated", err);
-    if (window.location.pathname !== "/sign-in") {
-      window.location.href = "/sign-in";
+    console.log('User not authenticated', err);
+    if (window.location.pathname !== '/sign-in') {
+      window.location.href = '/sign-in';
     }
     return {};
   }
@@ -90,40 +75,36 @@ const currentUser = async () => {
 function SP({ children, client }: SessionProps) {
   const [state, setState] = useState<State>(initialState);
 
-  const { data, isLoading } = useGetUserByIdQuery(
+  const { data, isLoading, fetchStatus } = useGetUserByIdQuery(
     client,
     {
-      id: state.claims && state.claims["x-hasura-user-id"],
+      id: state.claims && state.claims['x-hasura-user-id']
     },
     {
-      enabled: !!(state.claims && state.claims["x-hasura-user-id"]),
+      enabled: !!(state.claims && state.claims['x-hasura-user-id']),
       onSuccess: (d: any) => {
-        console.log("loaded user", d);
-        setState((s) => ({ ...s, loading: false }));
-      },
+        console.log('loaded user', d);
+        setState(s => ({ ...s, loading: false }));
+      }
     }
   );
 
   useEffect(() => {
     currentUser()
-      .then((res) => {
-        const complete =
-          res.userData?.claims && res.userData?.claims["x-hasura-user-id"];
-        setState((s) => ({
+      .then(res => {
+        const complete = res.userData?.claims && res.userData?.claims['x-hasura-user-id'];
+        setState(s => ({
           ...s,
-          loading: complete ? true : false,
-          ...res.userData,
+          loading: !!complete,
+          ...res.userData
         }));
         console.log(res.userData?.token);
         // client.setHeader("Authorization", `Bearer ${res.userData?.token}`);
-        client.setHeader(
-          "x-hasura-admin-secret",
-          process.env.NEXT_PUBLIC_HASURA_ADMIN_SECRET!
-        );
+        client.setHeader('x-hasura-admin-secret', process.env.NEXT_PUBLIC_HASURA_ADMIN_SECRET!);
         setTimeout(() => 1000);
       })
       .catch(() => {
-        setState((s) => ({ ...s, loading: false }));
+        setState(s => ({ ...s, loading: false }));
         setTimeout(() => 1000);
       });
   }, []);
@@ -135,15 +116,15 @@ function SP({ children, client }: SessionProps) {
         password,
         attributes: {
           email: username,
-          "custom:owner": "1",
-        },
+          'custom:owner': '1'
+        }
       });
       if (result) {
         await signIn(username, password);
         return result;
       }
     } catch (error) {
-      console.log("error signing up:", error);
+      console.log('error signing up:', error);
     }
   };
 
@@ -151,10 +132,10 @@ function SP({ children, client }: SessionProps) {
     try {
       const result = await Auth.signIn(username, password);
       const res = await currentUser();
-      client.setHeader("Authorization", `Bearer ${res.userData?.token}`);
-      setState((s) => ({
+      client.setHeader('Authorization', `Bearer ${res.userData?.token}`);
+      setState(s => ({
         ...s,
-        ...res.userData,
+        ...res.userData
       }));
       return result;
     } catch (error) {
@@ -165,23 +146,23 @@ function SP({ children, client }: SessionProps) {
   const signOut = async () => {
     try {
       await Auth.signOut({ global: true });
-      setState((s) => ({
+      setState(s => ({
         ...s,
         user: undefined,
         token: undefined,
         role: undefined,
-        claims: undefined,
+        claims: undefined
       }));
-      client.setHeader("Authorization", "");
-      setState((s) => ({
+      client.setHeader('Authorization', '');
+      setState(s => ({
         ...s,
         user: undefined,
         token: undefined,
         role: undefined,
-        claims: undefined,
+        claims: undefined
       }));
     } catch (error) {
-      console.log("error signing out: ", error);
+      console.log('error signing out: ', error);
     }
   };
 
@@ -190,39 +171,32 @@ function SP({ children, client }: SessionProps) {
       const result = await Auth.forgotPassword(email);
       return result;
     } catch (error) {
-      console.log("error sending forgot password code: ", error);
+      console.log('error sending forgot password code: ', error);
     }
   };
 
-  const resetPassword = async (
-    email: string,
-    code: string,
-    password: string
-  ) => {
+  const resetPassword = async (email: string, code: string, password: string) => {
     try {
       const result = await Auth.forgotPasswordSubmit(email, code, password);
       await signIn(email, password);
       return result;
     } catch (error) {
-      console.log("error resetting password: ", error);
+      console.log('error resetting password: ', error);
     }
   };
 
-  const updateAttributes = async (
-    user: CognitoUser,
-    attributes: { [key: string]: string }
-  ) => {
+  const updateAttributes = async (user: CognitoUser, attributes: { [key: string]: string }) => {
     try {
       const result = await Auth.updateUserAttributes(user, attributes);
       return result;
     } catch (error) {
-      console.log("error updating attributes: ", error);
+      console.log('error updating attributes: ', error);
     }
   };
 
   const value = {
     ...state,
-    loading: state.loading || isLoading,
+    loading: state.loading || (isLoading && fetchStatus !== 'idle'),
     client,
     userData: data && (data.user as User),
     signUp,
@@ -230,7 +204,7 @@ function SP({ children, client }: SessionProps) {
     signOut,
     forgotPassword,
     resetPassword,
-    updateAttributes,
+    updateAttributes
   };
 
   // if (state.loading) {
@@ -238,7 +212,7 @@ function SP({ children, client }: SessionProps) {
   // }
 
   return (
-    //@ts-ignore
+    // @ts-ignore
     <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
   );
 }

@@ -1,13 +1,4 @@
-import React, {
-  Dispatch,
-  SetStateAction,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-} from "react";
-import { useMemo } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 
 interface State {
   toast: boolean;
@@ -22,7 +13,7 @@ export interface ToastContextValue {
 
 const initialState: State = {
   toast: true,
-  toastData: null,
+  toastData: null
 };
 
 const ToastContext = createContext(initialState as ToastContextValue);
@@ -32,19 +23,14 @@ function TP({ children }: { children: React.ReactNode }) {
 
   const setToast = useCallback(
     (toast: boolean, toastData?: any) => {
-      setState((s) => ({ ...s, toast, toastData }));
+      setState(s => ({ ...s, toast, toastData }));
     },
     [setState]
   );
 
-  const value: ToastContextValue = useMemo(
-    () => ({ ...state, setToast }),
-    [setToast]
-  );
+  const value: ToastContextValue = useMemo(() => ({ ...state, setToast }), [setToast]);
 
-  return (
-    <ToastContext.Provider value={value}>{children}</ToastContext.Provider>
-  );
+  return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
 }
 
 export const ToastProvider = TP;

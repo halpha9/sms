@@ -1,19 +1,17 @@
-import React from "react";
-import { useForm } from "react-hook-form";
-import { Auth } from "aws-amplify";
-import { useRouter } from "next/router";
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { Auth } from 'aws-amplify';
 
-type FormType = {
+interface FormType {
   username: string;
   password: string;
-};
+}
 
 function Register() {
-  const { register: registerUser, handleSubmit: submitregister } =
-    useForm<FormType>({
-      mode: "all",
-      reValidateMode: "onChange",
-    });
+  const { register: registerUser, handleSubmit: submitregister } = useForm<FormType>({
+    mode: 'all',
+    reValidateMode: 'onChange'
+  });
 
   const registerSubmit = async (data: FormType) => {
     const { username, password } = data;
@@ -23,8 +21,8 @@ function Register() {
         password,
         attributes: {
           email: username,
-          "custom:owner": "1",
-        },
+          'custom:owner': '1'
+        }
       });
       const signInResult = await Auth.signIn({ username, password });
       console.log(result);
@@ -40,19 +38,16 @@ function Register() {
           className="border border-gray-300 p-1 px-4 rounded-lg"
           type="text"
           placeholder="Username"
-          {...registerUser("username", { required: true })}
+          {...registerUser('username', { required: true })}
         />
 
         <input
           className="border border-gray-300 p-1 px-4 rounded-lg"
           type="text"
           placeholder="Password"
-          {...registerUser("password", { required: true })}
+          {...registerUser('password', { required: true })}
         />
-        <button
-          className="border border-gray-300 p-1 px-4 rounded-lg"
-          type="submit"
-        >
+        <button className="border border-gray-300 p-1 px-4 rounded-lg" type="submit">
           Register
         </button>
       </form>
