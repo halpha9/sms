@@ -1,0 +1,15 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-sms-dev-140658-authRole",
+      "UnauthRoleArn": "arn:aws:iam::398627940113:role/amplify-sms-dev-140658-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::398627940113:role/amplify-sms-dev-140658-authRole",
+      "Region": "eu-west-2",
+      "DeploymentBucketName": "amplify-sms-dev-140658-deployment",
+      "UnauthRoleName": "amplify-sms-dev-140658-unauthRole",
+      "StackName": "amplify-sms-dev-140658",
+      "StackId": "arn:aws:cloudformation:eu-west-2:398627940113:stack/amplify-sms-dev-140658/6bd90ce0-7181-11ed-b6bd-0a187f42beda",
+      "AmplifyAppId": "d191tmwb3ogt62"
+    }
+  }
+}

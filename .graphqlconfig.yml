@@ -1,0 +1,15 @@
+projects:
+  ChatApp:
+    schemaPath: src/graphql/schema.json
+    includes:
+      - queries/**/*.graphql
+    excludes:
+      - ./amplify/**
+    extensions:
+      amplify:
+        codeGenTarget: typescript
+        generatedFileName: src/index.ts
+        docsFilePath: queries
+        region: eu-west-2
+        apiId: i3y4evjdvbenvfy32tc3eovbzq
+        maxDepth: 2

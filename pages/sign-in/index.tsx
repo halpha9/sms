@@ -97,6 +97,7 @@ const SignIn = () => {
   };
 
   const submit = async (data: FormType) => {
+    console.log(data);
     if (state.forgot) {
       return await forgotPassword(data);
     }

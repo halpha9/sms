@@ -3,8 +3,6 @@ import { useToast } from 'providers/toast';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import Spinner from '../../components/spinner';
-import { useSession } from '../../providers/session';
-import { useEditUserMutation, useGetUserByIdQuery } from '../../queries';
 
 interface FormType {
   first_name: string;
@@ -19,7 +17,6 @@ interface State {
 }
 
 function Profile() {
-  const { client, claims } = useSession();
   const { setToast } = useToast();
   const [state, setState] = React.useState<State>({
     loading: true,
@@ -27,17 +24,8 @@ function Profile() {
     edit: false
   });
 
-  const updateUser = useEditUserMutation(client);
-  const { data, isLoading } = useGetUserByIdQuery(
-    client,
-    {
-      id: claims && claims['x-hasura-user-id']
-    },
-    {
-      enabled: !!(claims && claims['x-hasura-user-id'])
-    }
-  );
-
+  const data = null;
+  const isLoading = false;
   const { register, handleSubmit } = useForm<FormType>({
     mode: 'all',
     reValidateMode: 'onChange',
@@ -57,25 +45,15 @@ function Profile() {
   };
 
   const saveChanges = async (info: FormType) => {
-    const { email, first_name, last_name } = info;
-    const payload = {
-      id: claims && claims['x-hasura-user-id'],
-      data: {
-        first_name,
-        last_name,
-        email
-      }
-    };
     try {
-      const res = await updateUser.mutateAsync(payload);
       setState(s => ({ ...s, edit: false }));
-      if (res) {
-        setToast(true, {
-          type: 'success',
-          title: 'Profile Updated',
-          message: ''
-        });
-      }
+      // if (res) {
+      //   setToast(true, {
+      //     type: 'success',
+      //     title: 'Profile Updated',
+      //     message: ''
+      //   });
+      // }
     } catch (err) {
       console.log(err);
       setToast(true, {

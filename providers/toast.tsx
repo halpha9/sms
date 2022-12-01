@@ -28,7 +28,7 @@ function TP({ children }: { children: React.ReactNode }) {
     [setState]
   );
 
-  const value: ToastContextValue = useMemo(() => ({ ...state, setToast }), [setToast]);
+  const value: ToastContextValue = useMemo(() => ({ ...state, setToast }), [setToast, state]);
 
   return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
 }

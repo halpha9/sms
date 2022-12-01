@@ -1,8 +1,6 @@
 import { CognitoUser, ISignUpResult } from 'amazon-cognito-identity-js';
 import { Auth } from 'aws-amplify';
-import { GraphQLClient } from 'graphql-request';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useGetUserByIdQuery, User } from '../queries';
 
 interface State {
   role?: string;
@@ -19,8 +17,7 @@ export interface ExtendedUser extends CognitoUser {
 }
 
 export interface SessionContextValue extends State {
-  client: GraphQLClient;
-  userData?: User;
+  userData?: ExtendedUser;
   signUp: (username: string, password: string) => Promise<ISignUpResult | undefined>;
   signIn: (username: string, password: string) => Promise<{ [key: string]: string }>;
   signOut: (navigation?: any) => Promise<void>;
@@ -37,7 +34,6 @@ export const SessionContext = createContext(initialState as SessionContextValue)
 
 interface SessionProps {
   children: React.ReactNode;
-  client: GraphQLClient;
 }
 
 const currentUser = async () => {
@@ -48,18 +44,9 @@ const currentUser = async () => {
     }
     const { idToken } = data.signInUserSession;
 
-    const claims =
-      idToken.payload && idToken.payload['https://hasura.io/jwt/claims']
-        ? JSON.parse(idToken.payload['https://hasura.io/jwt/claims'])
-        : {};
-
-    const token = idToken.jwtToken;
-
     const userData = {
       user: data,
-      claims,
-      token,
-      role: claims && claims['x-hasura-role']
+      token: idToken
     };
 
     return { userData };
@@ -72,35 +59,18 @@ const currentUser = async () => {
   }
 };
 
-function SP({ children, client }: SessionProps) {
+function SP({ children }: SessionProps) {
   const [state, setState] = useState<State>(initialState);
-
-  const { data, isLoading, fetchStatus } = useGetUserByIdQuery(
-    client,
-    {
-      id: state.claims && state.claims['x-hasura-user-id']
-    },
-    {
-      enabled: !!(state.claims && state.claims['x-hasura-user-id']),
-      onSuccess: (d: any) => {
-        console.log('loaded user', d);
-        setState(s => ({ ...s, loading: false }));
-      }
-    }
-  );
 
   useEffect(() => {
     currentUser()
       .then(res => {
-        const complete = res.userData?.claims && res.userData?.claims['x-hasura-user-id'];
+        const complete = res.userData?.token;
         setState(s => ({
           ...s,
-          loading: !!complete,
+          loading: complete ? false : true,
           ...res.userData
         }));
-        console.log(res.userData?.token);
-        // client.setHeader("Authorization", `Bearer ${res.userData?.token}`);
-        client.setHeader('x-hasura-admin-secret', process.env.NEXT_PUBLIC_HASURA_ADMIN_SECRET!);
         setTimeout(() => 1000);
       })
       .catch(() => {
@@ -113,11 +83,7 @@ function SP({ children, client }: SessionProps) {
     try {
       const result = await Auth.signUp({
         username,
-        password,
-        attributes: {
-          email: username,
-          'custom:owner': '1'
-        }
+        password
       });
       if (result) {
         await signIn(username, password);
@@ -132,7 +98,6 @@ function SP({ children, client }: SessionProps) {
     try {
       const result = await Auth.signIn(username, password);
       const res = await currentUser();
-      client.setHeader('Authorization', `Bearer ${res.userData?.token}`);
       setState(s => ({
         ...s,
         ...res.userData
@@ -153,7 +118,6 @@ function SP({ children, client }: SessionProps) {
         role: undefined,
         claims: undefined
       }));
-      client.setHeader('Authorization', '');
       setState(s => ({
         ...s,
         user: undefined,
@@ -196,9 +160,7 @@ function SP({ children, client }: SessionProps) {
 
   const value = {
     ...state,
-    loading: state.loading || (isLoading && fetchStatus !== 'idle'),
-    client,
-    userData: data && (data.user as User),
+    loading: state.loading,
     signUp,
     signIn,
     signOut,
