@@ -4,6 +4,8 @@ import SessionProvider from '../providers/session';
 import { Amplify } from 'aws-amplify';
 import Layout from '../components/layout';
 import ToastProvider from 'providers/toast';
+import AppProvider from 'providers/chat';
+import { ThemeProvider } from 'next-themes';
 
 Amplify.configure({
   Auth: {
@@ -22,19 +24,23 @@ Amplify.configure({
   aws_appsync_graphqlEndpoint: 'https://sybjuyeqwrcajjhrbyidpmeiti.appsync-api.eu-west-2.amazonaws.com/graphql',
   aws_appsync_region: process.env.NEXT_PUBLIC_COGNITO_REGION!,
   aws_appsync_authenticationType: 'AMAZON_COGNITO_USER_POOLS',
-  aws_appsync_apiKey: 'i3y4evjdvbenvfy32tc3eovbzq', // (optional) - AWS AppSync API Key
+  aws_appsync_apiKey: 'i3y4evjdvbenvfy32tc3eovbzq',
   ssr: true
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <ToastProvider>
-      <SessionProvider>
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-      </SessionProvider>
-    </ToastProvider>
+    <ThemeProvider attribute="class">
+      <ToastProvider>
+        <AppProvider>
+          <SessionProvider>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </SessionProvider>
+        </AppProvider>
+      </ToastProvider>
+    </ThemeProvider>
   );
 }
 

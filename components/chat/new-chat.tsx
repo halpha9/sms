@@ -1,14 +1,17 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import React, { Dispatch, SetStateAction } from 'react';
 import { HomeState } from 'pages';
-import ChatModal from './chat';
+import { createRoom } from 'queries/mutations';
+import { API } from 'aws-amplify';
 
 const NewChatModal = ({ state, setState }: { state: HomeState; setState: Dispatch<SetStateAction<HomeState>> }) => {
-  const data = null;
-  const isLoading = false;
-
   const createChatSession = async () => {
+    const payload = 'newSession';
     try {
+      await API.graphql({
+        query: createRoom,
+        variables: { input: { name: payload } }
+      });
     } catch (err) {
       console.log(err);
     }
@@ -45,11 +48,12 @@ const NewChatModal = ({ state, setState }: { state: HomeState; setState: Dispatc
                     </div>
                   </button>
                 </div>
-                {!isLoading && data && data.user && (
-                  <div className="relative p-6 flex-auto">
-                    <ChatModal setState={setState} data={data && data.user} state={state} />
-                  </div>
-                )}
+                <div className="relative p-6 flex-auto w-full">
+                  <input
+                    className="bg-slate-700 p-2 rounded-md text-slate-400 text-sm px-4 w-full"
+                    placeholder="Chat Name"
+                  />
+                </div>
                 <div className="flex items-center justify-end p-6 border-t border-solid border-slate-600 rounded-b">
                   <button
                     className="text-red-500 background-transparent tracking-wider font-semibold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1"
@@ -61,7 +65,7 @@ const NewChatModal = ({ state, setState }: { state: HomeState; setState: Dispatc
                   <button
                     className="text-white bg-slate-500 active:bg-slate-700 font-semibold tracking-wider uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1"
                     type="button"
-                    onClick={async () => await openSession()}
+                    onClick={() => openSession()}
                   >
                     Confirm
                   </button>

@@ -24,6 +24,9 @@ export const listMessagesForRoom = /* GraphQL */ `
         createdAt
         updatedAt
         roomId
+        content {
+          text
+        }
       }
       nextToken
     }

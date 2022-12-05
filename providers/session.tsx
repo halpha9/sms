@@ -12,6 +12,7 @@ interface State {
 
 export interface ExtendedUser extends CognitoUser {
   imageUrl?: string;
+  username: string;
   attributes: { [key: string]: any };
   pool: { [key: string]: any };
 }
@@ -43,7 +44,6 @@ const currentUser = async () => {
       return {};
     }
     const { idToken } = data.signInUserSession;
-
     const userData = {
       user: data,
       token: idToken
@@ -71,6 +71,8 @@ function SP({ children }: SessionProps) {
           loading: complete ? false : true,
           ...res.userData
         }));
+        setState(s => ({ ...s, loading: false }));
+
         setTimeout(() => 1000);
       })
       .catch(() => {

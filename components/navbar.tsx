@@ -6,14 +6,18 @@ import {
   ArrowRightOnRectangleIcon,
   ChatBubbleLeftEllipsisIcon,
   MagnifyingGlassIcon,
+  MoonIcon,
   UserIcon
 } from '@heroicons/react/24/outline';
+import { MoonIcon as MIcon } from '@heroicons/react/24/solid';
 import { useSession } from '../providers/session';
 import { Menu, Transition } from '@headlessui/react';
+import { useTheme } from 'next-themes';
 
 function NavBar() {
-  const { register } = useForm({ mode: 'all', reValidateMode: 'onChange' });
   const { signOut } = useSession();
+  const { resolvedTheme, setTheme } = useTheme();
+  const { register } = useForm({ mode: 'all', reValidateMode: 'onChange' });
 
   const handleLogout = async () => {
     try {
@@ -24,26 +28,26 @@ function NavBar() {
   };
 
   return (
-    <div className="w-full p-4 px-10 border-b border-slate-600 pb-5 bg-slate-800 flex justify-between items-center">
+    <div className="w-full p-4 px-10 bg-gray-100 border-b border-gray-200 dark:border-slate-600 pb-5 dark:bg-slate-800 flex justify-between items-center">
       <div className="flex-1">
         <Link href="/" passHref>
-          <ChatBubbleLeftEllipsisIcon className="w-8 h-8 text-slate-400" />
+          <ChatBubbleLeftEllipsisIcon className="w-8 h-8 dark:text-slate-400 text-gray-500" />
         </Link>
       </div>
 
-      <div className="self-end flex items-center space-x-2">
+      <div className="self-end flex items-center space-x-4">
         <div className="flex space-x-2 items-center">
           <input
-            className="bg-slate-700 p-2 rounded-md text-slate-400 text-sm px-4"
+            className="bg-white dark:bg-slate-700 border-2 border-gray-300 p-2 rounded-md dark:text-slate-400 text-sm px-4"
             placeholder="Search"
             {...register('search')}
           />
-          <MagnifyingGlassIcon className="text-slate-400 w-7 h-7" />
+          <MagnifyingGlassIcon className="text-gray-500 dark:text-slate-400 w-7 h-7" />
         </div>
-        <div className=" w-56 text-right">
+        <div className="w-56 text-right">
           <Menu as="div" className="relative inline-block text-left">
             <div>
-              <Menu.Button className="rounded-full bg-slate-400 w-10 h-10" />
+              <Menu.Button className="rounded-full dark:bg-slate-400 bg-gray-400 w-10 h-10" />
             </div>
             <Transition
               as={Fragment}
@@ -54,14 +58,16 @@ function NavBar() {
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Menu.Items className="z-10 absolute right-0 mt-2 w-56 origin-top-right divide-y divide-slate-600 rounded-md bg-slate-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+              <Menu.Items className="z-10 absolute right-0 mt-2 w-56 origin-top-right divide-y dark:divide-slate-600 divide-gray-300 rounded-md bg-white dark:bg-slate-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                 <div className="px-1 py-1 ">
                   <Link href="/profile" passHref>
                     <Menu.Item>
                       {({ active }) => (
                         <button
                           className={`${
-                            active ? 'bg-slate-600 text-slate-100' : 'text-white'
+                            active
+                              ? 'dark:bg-slate-600 dark:text-slate-100 bg-gray-200 text-gray-500'
+                              : 'dark:text-white text-gray-400 bg-white'
                           } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                         >
                           {active ? (
@@ -81,7 +87,9 @@ function NavBar() {
                       <button
                         onClick={handleLogout}
                         className={`${
-                          active ? 'bg-slate-600 text-slate-100' : 'text-white'
+                          active
+                            ? 'dark:bg-slate-600 dark:text-slate-100 bg-gray-200 text-gray-500'
+                            : 'dark:text-white text-gray-400 bg-white'
                         } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                       >
                         {active ? (
@@ -98,6 +106,13 @@ function NavBar() {
             </Transition>
           </Menu>
         </div>
+        <button onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}>
+          {resolvedTheme === 'dark' ? (
+            <MoonIcon className="w-6 h-6 text-slate-400" />
+          ) : (
+            <MIcon className="w-6 h-6 text-slate-400" />
+          )}
+        </button>
       </div>
     </div>
   );
