@@ -10,6 +10,27 @@ import { ThemeProvider } from 'next-themes';
 Amplify.configure({
   Auth: {
     region: process.env.NEXT_PUBLIC_COGNITO_REGION!,
+    userPoolId: process.env.NEXT_PUBLIC_USER_POOL!,
+    userPoolWebClientId: process.env.NEXT_PUBLIC_CLIENT_ID!,
+    identityPoolId: process.env.NEXT_PUBLIC_COGNITO_ID_POOL!
+  },
+  Storage: {
+    AWSS3: {
+      bucket: process.env.NEXT_PUBLIC_BUCKET_NAME!,
+      region: process.env.NEXT_PUBLIC_COGNITO_REGION!
+    }
+  },
+  aws_project_region: process.env.NEXT_PUBLIC_COGNITO_REGION!,
+  aws_appsync_graphqlEndpoint: process.env.NEXT_APPSYNC_GRAPHQL_ENDPOINT!,
+  aws_appsync_region: process.env.NEXT_PUBLIC_COGNITO_REGION!,
+  aws_appsync_authenticationType: process.env.NEXT_PUBLIC_APPSYNC_API_KEY!,
+  aws_appsync_apiKey: process.env.NEXT_PUBLIC_APPSYNC_API_KEY!,
+  ssr: true
+});
+
+Amplify.configure({
+  Auth: {
+    region: process.env.NEXT_PUBLIC_COGNITO_REGION!,
     userPoolId: 'eu-west-2_H5L9iFZ1S',
     userPoolWebClientId: '1q92o2f9nuqvv9cl03lkjb0jsp',
     identityPoolId: 'eu-west-2:e2eebd08-a0c2-47be-bbfb-89a4d4d88d4d'

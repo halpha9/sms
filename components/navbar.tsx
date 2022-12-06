@@ -9,7 +9,7 @@ import {
   MoonIcon,
   UserIcon
 } from '@heroicons/react/24/outline';
-import { MoonIcon as MIcon } from '@heroicons/react/24/solid';
+import { MoonIcon as MIcon, UserIcon as UIcon } from '@heroicons/react/24/solid';
 import { useSession } from '../providers/session';
 import { Menu, Transition } from '@headlessui/react';
 import { useTheme } from 'next-themes';
@@ -31,7 +31,7 @@ function NavBar() {
     <div className="w-full p-4 px-10 bg-gray-100 border-b border-gray-200 dark:border-slate-600 pb-5 dark:bg-slate-800 flex justify-between items-center">
       <div className="flex-1">
         <Link href="/" passHref>
-          <ChatBubbleLeftEllipsisIcon className="w-8 h-8 dark:text-slate-400 text-gray-500" />
+          <ChatBubbleLeftEllipsisIcon className="w-8 h-8 dark:text-slate-400 text-gray-400" />
         </Link>
       </div>
 
@@ -42,12 +42,14 @@ function NavBar() {
             placeholder="Search"
             {...register('search')}
           />
-          <MagnifyingGlassIcon className="text-gray-500 dark:text-slate-400 w-7 h-7" />
+          <MagnifyingGlassIcon className="text-gray-400 dark:text-slate-400 w-7 h-7" />
         </div>
         <div className="w-56 text-right">
           <Menu as="div" className="relative inline-block text-left">
             <div>
-              <Menu.Button className="rounded-full dark:bg-slate-400 bg-gray-400 w-10 h-10" />
+              <Menu.Button className="rounded-full dark:bg-slate-400 bg-gray-300 border-2 border-gray-300 dark:border-none  w-10 h-10 flex justify-center items-center">
+                <UIcon className="w-6 h-6 text-slate-200" />
+              </Menu.Button>
             </div>
             <Transition
               as={Fragment}
@@ -67,7 +69,7 @@ function NavBar() {
                           className={`${
                             active
                               ? 'dark:bg-slate-600 dark:text-slate-100 bg-gray-200 text-gray-500'
-                              : 'dark:text-white text-gray-400 bg-white'
+                              : 'dark:text-white dark:bg-slate-800 text-gray-500 bg-white'
                           } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                         >
                           {active ? (
@@ -89,13 +91,13 @@ function NavBar() {
                         className={`${
                           active
                             ? 'dark:bg-slate-600 dark:text-slate-100 bg-gray-200 text-gray-500'
-                            : 'dark:text-white text-gray-400 bg-white'
+                            : 'dark:text-white text-gray-500 dark:bg-slate-800 bg-white'
                         } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                       >
                         {active ? (
-                          <ArrowRightOnRectangleIcon className="mr-2 h-5 w-5 text-slate-400" aria-hidden="true" />
+                          <ArrowRightOnRectangleIcon className="mr-2 h-5 w-5 text-slate-500" aria-hidden="true" />
                         ) : (
-                          <ArrowLeftOnRectangleIcon className="mr-2 h-5 w-5 text-slate-400" aria-hidden="true" />
+                          <ArrowLeftOnRectangleIcon className="mr-2 h-5 w-5 text-slate-500" aria-hidden="true" />
                         )}
                         Logout
                       </button>
@@ -108,9 +110,9 @@ function NavBar() {
         </div>
         <button onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}>
           {resolvedTheme === 'dark' ? (
-            <MoonIcon className="w-6 h-6 text-slate-400" />
+            <MoonIcon className="w-7 h-7 text-slate-300" />
           ) : (
-            <MIcon className="w-6 h-6 text-slate-400" />
+            <MIcon className="w-7 h-7 text-slate-300" />
           )}
         </button>
       </div>

@@ -1,6 +1,6 @@
 projects:
   ChatApp:
-    schemaPath: src/graphql/schema.json
+    schemaPath: graphql/schema.json
     includes:
       - queries/**/*.ts
     excludes:

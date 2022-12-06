@@ -6,27 +6,33 @@ import {
   EllipsisVerticalIcon
 } from '@heroicons/react/24/outline';
 import { useSession } from '../../providers/session';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { HomeState } from 'pages';
+import React, { useEffect, useState } from 'react';
 import { createMessage } from 'queries/mutations';
 import { useApp } from 'providers/chat';
 import { API } from 'aws-amplify';
-import { listMessagesForRoom } from 'queries/queries';
+import { listMessagesForRoom, listRooms } from 'queries/queries';
 import { graphqlOperation } from '@aws-amplify/api';
-import { ListMessagesForRoomQuery } from 'queries';
+import { ListMessagesForRoomQuery, ListRoomsQuery } from 'queries';
+import { onCreateMessageByRoomId } from 'queries/subscriptions';
+import { useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { scrollToBottom } from 'utils/page';
+type Room = {
+  __typename: 'Room';
+  id: string;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+} | null;
 
-export default function ChatBox({
-  state,
-  setState
-}: {
-  state: HomeState;
-  setState: Dispatch<SetStateAction<HomeState>>;
-}) {
+export default function ChatBox() {
   type StateProps = string;
   const { user } = useSession();
   const { chatSession } = useApp();
   const [message, setMessage] = useState<StateProps>('');
   const [messages, setMessages] = useState([]);
+  const [room, setRoom] = useState<Room>(null);
+  const messagesEndRef = useRef(null);
 
   const sendMessage = async () => {
     const payload = {
@@ -50,12 +56,35 @@ export default function ChatBox({
   };
 
   useEffect(() => {
+    async function subscribe() {
+      //@ts-ignore
+      (await API.graphql(graphqlOperation(onCreateMessageByRoomId, { roomId: chatSession }))).subscribe({
+        next: ({ value }) => {
+          setMessages(messages => [...messages, value.data.onCreateMessageByRoomId]);
+          scrollToBottom(messagesEndRef);
+        }
+      }) as {
+        data: ListMessagesForRoomQuery;
+        errors: any[];
+      };
+    }
+    if (chatSession) {
+      subscribe();
+    }
+  }, [chatSession]);
+
+  useEffect(() => {
     async function getMessages() {
       try {
         const { data } = (await API.graphql(graphqlOperation(listMessagesForRoom, { roomId: chatSession }))) as {
           data: ListMessagesForRoomQuery;
           errors: any[];
         };
+        const { data: roomData } = (await API.graphql(graphqlOperation(listRooms, { roomId: chatSession }))) as {
+          data: ListRoomsQuery;
+          errors: any[];
+        };
+        setRoom(roomData.listRooms.items[0]);
         setMessages(data.listMessagesForRoom.items);
       } catch (err) {
         console.log(err);
@@ -67,24 +96,27 @@ export default function ChatBox({
   }, [chatSession]);
 
   return (
-    <div className="flex flex-col h-full w-full bg-white px-4 py-6">
-      <div className="flex flex-row items-center py-4 px-6 rounded-2xl shadow">
-        <div className="flex items-center justify-center h-10 w-10 rounded-full bg-pink-500 text-pink-100">T</div>
-        <div className="flex flex-col ml-3">
-          <div className="font-semibold text-sm">UI Art Design</div>
-          <div className="text-xs text-gray-500">Active</div>
-        </div>
+    <div className="flex flex-col h-full w-full bg-white dark:bg-slate-700 px-4 py-6">
+      <div className="flex flex-row items-center py-4 px-6 rounded-2xl shadow bg-gray-100 dark:bg-slate-800">
+        {room && (
+          <>
+            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-pink-500 text-pink-100">
+              {room.name[0]}
+            </div>
+            <div className="flex flex-col ml-3">
+              <div className="font-semibold text-sm dark:text-slate-300">{room.name}</div>
+              <div className="text-xs text-gray-500 dark:text-slate-400">Active</div>
+            </div>
+          </>
+        )}
         <div className="ml-auto">
           <ul className="flex flex-row items-center space-x-2">
             <li>
-              <a
-                href="#"
-                className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-400 h-10 w-10 rounded-full"
-              >
+              <div className="flex items-center justify-center bg-gray-200  dark:bg-slate-700 shadow text-gray-400 h-10 w-10 rounded-full">
                 <span>
                   <EllipsisVerticalIcon className="w-6 h-6" />
                 </span>
-              </a>
+              </div>
             </li>
           </ul>
         </div>
@@ -92,102 +124,64 @@ export default function ChatBox({
       <div className="h-full overflow-hidden py-4">
         <div className="h-full overflow-y-auto">
           <div className="grid grid-cols-12 gap-y-2">
-            {messages &&
-              messages.length > 0 &&
-              messages.map((message, index) => {
-                if (user.username !== message.owner)
+            <AnimatePresence initial={false}>
+              {messages &&
+                messages.length > 0 &&
+                messages.map((message, index) => {
+                  if (user.username !== message.owner)
+                    return (
+                      <motion.div
+                        layout
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{
+                          opacity: { duration: 0.5 },
+                          layout: {
+                            duration: index * 0.05
+                          }
+                        }}
+                        key={index}
+                        className="col-start-1 col-end-8 p-3 rounded-lg"
+                      >
+                        <div className="flex flex-row items-center">
+                          <div className="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 flex-shrink-0">
+                            A
+                          </div>
+                          <div className="relative ml-3 text-sm bg-white dark:bg-slate-100 py-2 px-4 shadow rounded-xl">
+                            <div>{message.content.text}</div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
                   return (
-                    <div key={index} className="col-start-1 col-end-8 p-3 rounded-lg">
-                      <div className="flex flex-row items-center">
+                    <motion.div
+                      layout
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{
+                        opacity: { duration: 0.5 },
+                        layout: {
+                          duration: index * 0.05
+                        }
+                      }}
+                      key={index}
+                      className="col-start-6 col-end-13 p-3 rounded-lg"
+                    >
+                      <div className="flex items-center justify-start flex-row-reverse">
                         <div className="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 flex-shrink-0">
                           A
                         </div>
-                        <div className="relative ml-3 text-sm bg-white py-2 px-4 shadow rounded-xl">
+                        <div className="relative mr-3 text-sm bg-indigo-100 dark:bg-slate-400 py-2 px-4 shadow rounded-xl">
                           <div>{message.content.text}</div>
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   );
-                return (
-                  <div key={index} className="col-start-6 col-end-13 p-3 rounded-lg">
-                    <div className="flex items-center justify-start flex-row-reverse">
-                      <div className="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 flex-shrink-0">
-                        A
-                      </div>
-                      <div className="relative mr-3 text-sm bg-indigo-100 py-2 px-4 shadow rounded-xl">
-                        <div>{message.content.text}</div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-
-            {/* <div className="col-start-1 col-end-8 p-3 rounded-lg">
-              <div className="flex flex-row items-center">
-                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 flex-shrink-0">
-                  A
-                </div>
-                <div className="relative ml-3 text-sm bg-white py-2 px-4 shadow rounded-xl">
-                  <div className="flex flex-row items-center">
-                    <button className="flex items-center justify-center bg-indigo-600 hover:bg-indigo-800 rounded-full h-8 w-10">
-                      <svg
-                        className="w-6 h-6 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="1.5"
-                          d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                        ></path>
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="1.5"
-                          d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        ></path>
-                      </svg>
-                    </button>
-                    <div className="flex flex-row items-center space-x-px ml-4">
-                      <div className="h-2 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-2 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-4 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-8 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-8 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-10 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-10 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-12 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-10 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-6 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-5 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-4 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-3 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-2 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-2 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-2 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-10 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-2 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-10 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-8 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-8 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-1 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-1 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-2 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-8 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-8 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-2 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-2 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-2 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-2 w-1 bg-gray-500 rounded-lg"></div>
-                      <div className="h-4 w-1 bg-gray-500 rounded-lg"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div> */}
+                })}
+            </AnimatePresence>
+            <div ref={messagesEndRef} />
           </div>
         </div>
       </div>
@@ -205,7 +199,7 @@ export default function ChatBox({
               onKeyDown={e => {
                 if (e.key === 'Enter') sendMessage();
               }}
-              className="bg-white dark:bg-white border border-transparent w-full focus:outline-none text-sm h-10 flex items-center"
+              className="bg-white dark:bg-slate-700 dark:text-slate-300 px-8 rounded-lg border border-transparent w-full focus:outline-none text-sm h-10 flex items-center"
               placeholder="Type your message...."
             />
           </div>
@@ -219,7 +213,7 @@ export default function ChatBox({
           </div>
         </div>
         <div onClick={() => sendMessage()} className="ml-6">
-          <button className="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 hover:bg-gray-300 text-indigo-800 text-white">
+          <button className="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200  dark:text-slate-300 dark:bg-slate-500  text-gray-500">
             <PaperAirplaneIcon className="w-5 h-5" />
           </button>
         </div>
