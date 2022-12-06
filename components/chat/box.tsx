@@ -1,12 +1,13 @@
 import {
   PaperAirplaneIcon,
-  PaperClipIcon,
   PhotoIcon,
+  PlusCircleIcon,
   MicrophoneIcon,
-  EllipsisVerticalIcon
+  EllipsisVerticalIcon,
+  ComputerDesktopIcon
 } from '@heroicons/react/24/outline';
 import { useSession } from '../../providers/session';
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { createMessage } from 'queries/mutations';
 import { useApp } from 'providers/chat';
 import { API } from 'aws-amplify';
@@ -17,6 +18,7 @@ import { onCreateMessageByRoomId } from 'queries/subscriptions';
 import { useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { scrollToBottom } from 'utils/page';
+import { Menu, Transition } from '@headlessui/react';
 type Room = {
   __typename: 'Room';
   id: string;
@@ -33,6 +35,30 @@ export default function ChatBox() {
   const [messages, setMessages] = useState([]);
   const [room, setRoom] = useState<Room>(null);
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
+
+  const handleClick = () => {
+    inputRef.current.click();
+  };
+
+  const handleFileChange = event => {
+    const fileObj = event.target.files && event.target.files[0];
+    if (!fileObj) {
+      return;
+    }
+
+    console.log('fileObj is', fileObj);
+
+    // 👇️ reset file input
+    event.target.value = null;
+
+    // 👇️ is now empty
+    console.log(event.target.files);
+
+    // 👇️ can still access file object here
+    console.log(fileObj);
+    console.log(fileObj.name);
+  };
 
   const sendMessage = async () => {
     const payload = {
@@ -204,11 +230,53 @@ export default function ChatBox() {
             />
           </div>
           <div className="flex flex-row">
-            <button className="flex items-center justify-center h-10 w-8 text-gray-400">
-              <PaperClipIcon className="w-5 h-5" />
-            </button>
+            <div className="w-full text-right">
+              <Menu as="div" className="relative inline-block text-left">
+                <div>
+                  <Menu.Button>
+                    <button className="flex items-center justify-center h-10 w-8 text-gray-400">
+                      <input className="hidden" ref={inputRef} type="file" onChange={handleFileChange} />
+                      <PlusCircleIcon className="w-6 h-6" />
+                    </button>
+                  </Menu.Button>
+                </div>
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="transform opacity-0 scale-95"
+                  enterTo="transform opacity-100 scale-100"
+                  leave="transition ease-in duration-75"
+                  leaveFrom="transform opacity-100 scale-100"
+                  leaveTo="transform opacity-0 scale-95"
+                >
+                  <Menu.Items className="z-10 absolute right-0 mt-2 w-72 -top-20 origin-bottom-right divide-y dark:divide-slate-600 divide-gray-300 rounded-md bg-white dark:bg-slate-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <div className="px-1 py-1">
+                      <Menu.Item>
+                        {({ active }) => (
+                          <button
+                            onClick={handleClick}
+                            className={`${
+                              active
+                                ? 'dark:bg-slate-700 dark:text-slate-100 bg-gray-200 text-gray-500'
+                                : 'dark:text-white text-gray-500 dark:bg-slate-800 bg-white'
+                            } group flex w-full items-center rounded-md px-8 py-2 text-sm font-semibold truncate `}
+                          >
+                            {active ? (
+                              <ComputerDesktopIcon className="mr-2 h-5 w-5 text-slate-500" aria-hidden="true" />
+                            ) : (
+                              <ComputerDesktopIcon className="mr-2 h-5 w-5 text-slate-500" aria-hidden="true" />
+                            )}
+                            <span className="w-full">Upload from your device</span>
+                          </button>
+                        )}
+                      </Menu.Item>
+                    </div>
+                  </Menu.Items>
+                </Transition>
+              </Menu>
+            </div>
             <button className="flex items-center justify-center h-10 w-8 text-gray-400 ml-1 mr-2">
-              <PhotoIcon className="w-5 h-5" />
+              <PhotoIcon className="w-6 h-6" />
             </button>
           </div>
         </div>

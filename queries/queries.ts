@@ -15,6 +15,7 @@ export const listRooms = /* GraphQL */ `
     }
   }
 `;
+
 export const listMessagesForRoom = /* GraphQL */ `
   query ListMessagesForRoom($roomId: ID!, $sortDirection: ModelSortDirection) {
     listMessagesForRoom(roomId: $roomId, sortDirection: $sortDirection) {

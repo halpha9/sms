@@ -126,11 +126,11 @@ const Home = ({ roomsList }) => {
                         <div className="flex flex-col flex-grow ml-3">
                           <div className="text-sm font-medium dark:text-slate-300">{session.name}</div>
                         </div>
-                        <div className="flex-shrink-0 ml-2 self-end mb-1">
+                        {/* <div className="flex-shrink-0 ml-2 self-end mb-1">
                           <span className="flex items-center justify-center h-5 w-5 bg-red-500 text-white text-xs rounded-full">
                             5
                           </span>
-                        </div>
+                        </div> */}
                       </motion.div>
                     );
                   })}

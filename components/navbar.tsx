@@ -73,9 +73,9 @@ function NavBar() {
                           } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                         >
                           {active ? (
-                            <UserIcon className="mr-2 h-5 w-5 text-slate-400" aria-hidden="true" />
+                            <UserIcon className="mr-2 h-5 w-5 text-slate-500" aria-hidden="true" />
                           ) : (
-                            <UserIcon className="mr-2 h-5 w-5 text-slate-400" aria-hidden="true" />
+                            <UserIcon className="mr-2 h-5 w-5 text-slate-500" aria-hidden="true" />
                           )}
                           Profile
                         </button>
@@ -110,9 +110,9 @@ function NavBar() {
         </div>
         <button onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}>
           {resolvedTheme === 'dark' ? (
-            <MoonIcon className="w-7 h-7 text-slate-300" />
-          ) : (
             <MIcon className="w-7 h-7 text-slate-300" />
+          ) : (
+            <MoonIcon className="w-7 h-7 text-slate-300" />
           )}
         </button>
       </div>
