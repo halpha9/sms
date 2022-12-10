@@ -4,7 +4,8 @@ import {
   PlusCircleIcon,
   MicrophoneIcon,
   EllipsisVerticalIcon,
-  ComputerDesktopIcon
+  ComputerDesktopIcon,
+  ChatBubbleLeftEllipsisIcon
 } from '@heroicons/react/24/outline';
 import { useSession } from '../../providers/session';
 import React, { Fragment, useEffect, useState } from 'react';
@@ -19,6 +20,7 @@ import { useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { scrollToBottom } from 'utils/page';
 import { Menu, Transition } from '@headlessui/react';
+
 type Room = {
   __typename: 'Room';
   id: string;
@@ -154,6 +156,7 @@ export default function ChatBox() {
               {messages &&
                 messages.length > 0 &&
                 messages.map((message, index) => {
+                  //Other user
                   if (user.username !== message.owner)
                     return (
                       <motion.div
@@ -171,9 +174,6 @@ export default function ChatBox() {
                         className="col-start-1 col-end-8 p-3 rounded-lg"
                       >
                         <div className="flex flex-row items-center">
-                          <div className="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 flex-shrink-0">
-                            A
-                          </div>
                           <div className="relative ml-3 text-sm bg-white dark:bg-slate-100 py-2 px-4 shadow rounded-xl">
                             <div>{message.content.text}</div>
                           </div>
@@ -197,7 +197,7 @@ export default function ChatBox() {
                     >
                       <div className="flex items-center justify-start flex-row-reverse">
                         <div className="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 flex-shrink-0">
-                          A
+                          {user.attributes.email[0].toUpperCase()}
                         </div>
                         <div className="relative mr-3 text-sm bg-indigo-100 dark:bg-slate-400 py-2 px-4 shadow rounded-xl">
                           <div>{message.content.text}</div>
@@ -209,6 +209,17 @@ export default function ChatBox() {
             </AnimatePresence>
             <div ref={messagesEndRef} />
           </div>
+          {messages.length === 0 && (
+            <div className="flex w-full h-full justify-center items-center">
+              <div className="text-center w-full flex-col flex justify-center items-center">
+                <div className="">
+                  <ChatBubbleLeftEllipsisIcon className="dark:text-slate-300 w-12 h-12" />
+                </div>
+                <h3 className="mt-2 text-sm font-medium dark:text-gray-400">No Messages</h3>
+                <p className="mt-1 text-sm dark:text-slate-300">Get the conversation started by sending a message</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

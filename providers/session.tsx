@@ -127,6 +127,7 @@ function SP({ children }: SessionProps) {
         role: undefined,
         claims: undefined
       }));
+      setTimeout(() => (window.location.href = '/sign-in'), 500);
     } catch (error) {
       console.log('error signing out: ', error);
     }

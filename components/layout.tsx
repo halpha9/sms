@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import { useToast } from 'providers/toast';
 import React from 'react';
 import { useSession } from '../providers/session';
@@ -10,7 +11,7 @@ const zIndex = { zIndex: 9999999 };
 
 function Layout({ children }: { children: React.ReactNode }) {
   const { loading } = useSession();
-
+  const route = useRouter();
   const { toast, toastData } = useToast();
 
   return (
@@ -18,7 +19,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       {!loading ? (
         <>
           <div className="fixed inset-0  bg-white flex-1 flex flex-col transition-all z-0 overflow-hidden outline-none">
-            <NavBar />
+            {route.pathname !== '/sign-in' && <NavBar />}
             <div className={'relative flex-1 overflow-y-scroll'}>{children}</div>
           </div>
 

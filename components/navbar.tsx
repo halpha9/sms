@@ -1,23 +1,39 @@
 import Link from 'next/link';
-import React, { Fragment } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { Fragment, useEffect } from 'react';
 import {
   ArrowLeftOnRectangleIcon,
   ArrowRightOnRectangleIcon,
   ChatBubbleLeftEllipsisIcon,
-  MagnifyingGlassIcon,
   MoonIcon,
   UserIcon
 } from '@heroicons/react/24/outline';
 import { MoonIcon as MIcon, UserIcon as UIcon } from '@heroicons/react/24/solid';
 import { useSession } from '../providers/session';
-import { Menu, Transition } from '@headlessui/react';
+import { Menu, Transition, Combobox } from '@headlessui/react';
 import { useTheme } from 'next-themes';
+import { useState } from 'react';
+import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
+import { API, graphqlOperation } from 'aws-amplify';
+import { listRooms } from 'queries/queries';
+import { ListRoomsQuery } from 'queries';
+import { format, parseISO } from 'date-fns';
+import { useApp } from 'providers/chat';
+
+type Room = {
+  __typename: 'Room';
+  id: string;
+  name: string;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+};
 
 function NavBar() {
   const { signOut } = useSession();
   const { resolvedTheme, setTheme } = useTheme();
-  const { register } = useForm({ mode: 'all', reValidateMode: 'onChange' });
+  const { setState: setAppState, chatSession } = useApp();
+  const [rooms, setRooms] = useState(null);
+  const [selected, setSelected] = useState(null);
+  const [query, setQuery] = useState('');
 
   const handleLogout = async () => {
     try {
@@ -26,6 +42,40 @@ function NavBar() {
       console.log(err);
     }
   };
+
+  useEffect(() => {
+    async function getMessages() {
+      try {
+        const { data: roomData } = (await API.graphql(graphqlOperation(listRooms))) as {
+          data: ListRoomsQuery;
+          errors: any[];
+        };
+        setRooms(roomData.listRooms.items);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    getMessages();
+  }, []);
+
+  const moveToRoom = (room: string) => {
+    try {
+      if (chatSession !== room) {
+        setAppState(s => ({ ...s, chatSession: room }));
+      } else {
+        setAppState(s => ({ ...s, chatSession: '' }));
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const filteredRooms =
+    query === ''
+      ? rooms
+      : rooms.filter(room =>
+          room.name.toLowerCase().replace(/\s+/g, '').includes(query.toLowerCase().replace(/\s+/g, ''))
+        );
 
   return (
     <div className="w-full p-4 px-10 bg-gray-100 border-b border-gray-200 dark:border-slate-600 pb-5 dark:bg-slate-800 flex justify-between items-center">
@@ -36,13 +86,76 @@ function NavBar() {
       </div>
 
       <div className="self-end flex items-center space-x-4">
-        <div className="flex space-x-2 items-center">
-          <input
-            className="bg-white dark:bg-slate-700 border-2 border-gray-300 p-2 rounded-md dark:text-slate-400 text-sm px-4"
-            placeholder="Search"
-            {...register('search')}
-          />
-          <MagnifyingGlassIcon className="text-gray-400 dark:text-slate-400 w-7 h-7" />
+        <div className="w-96">
+          <Combobox value={selected} onChange={setSelected}>
+            <div className="relative mt-1">
+              <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
+                <Combobox.Input
+                  className="bg-white dark:bg-slate-700 border-2 border-gray-300 p-2 rounded-lg dark:text-slate-400 text-sm px-4 w-full"
+                  displayValue={(room: Room) => (room ? room.name : 'Select A Room')}
+                  onChange={event => setQuery(event.target.value)}
+                />
+                <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                  <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                </Combobox.Button>
+              </div>
+              <Transition
+                as={Fragment}
+                leave="transition ease-in duration-100"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0"
+                afterLeave={() => setQuery('')}
+              >
+                <Combobox.Options className="z-10 absolute right-0 mt-8 w-full origin-top-right divide-y dark:divide-slate-600 divide-gray-300 rounded-lg bg-white dark:bg-slate-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  {filteredRooms && filteredRooms.length === 0 && query !== '' ? (
+                    <div className="relative cursor-default select-none py-2 px-4 text-gray-700 dark:text-slate-400 text-sm">
+                      Nothing found.
+                    </div>
+                  ) : (
+                    filteredRooms &&
+                    filteredRooms.map(room => (
+                      <Combobox.Option
+                        key={room.id}
+                        onClick={() => moveToRoom(room.id)}
+                        className={({ active }) =>
+                          `relative cursor-default select-none py-2 pl-10 pr-4 m-1 ${
+                            active
+                              ? ' dark:text-slate-100 dark:bg-slate-600 bg-gray-200  rounded-lg text-gray-500'
+                              : 'dark:text-white  text-gray-500 '
+                          }`
+                        }
+                        value={room}
+                      >
+                        {({ selected, active }) => (
+                          <>
+                            <span className="block truncate text-sm text-gray-400 dark:text-slate-300">
+                              {room.name}
+                            </span>
+                            <span className="block truncate text-xs text-gray-400 dark:text-slate-300">
+                              <span className="font-medium text-gray-500 dark:text-slate-400">Started:</span>
+                              {format(parseISO(room.createdAt), '	PPP')} at {format(parseISO(room.createdAt), 'p')}
+                            </span>
+                            {selected ? (
+                              <span
+                                className={`absolute inset-y-0 left-0 flex items-center pl-2 ${
+                                  active ? 'text-white' : 'text-slate-600'
+                                }`}
+                              >
+                                <CheckIcon
+                                  className="h-5 w-5 dark:text-slate-300 text-gray-400 mr-3"
+                                  aria-hidden="true"
+                                />
+                              </span>
+                            ) : null}
+                          </>
+                        )}
+                      </Combobox.Option>
+                    ))
+                  )}
+                </Combobox.Options>
+              </Transition>
+            </div>
+          </Combobox>
         </div>
         <div className="w-56 text-right">
           <Menu as="div" className="relative inline-block text-left">
