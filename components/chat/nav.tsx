@@ -5,6 +5,8 @@ import { scrollToBottom } from 'utils/page';
 import { motion } from 'framer-motion';
 import { API, graphqlOperation } from 'aws-amplify';
 import { onCreateRoom } from 'queries/subscriptions';
+import { OnCreateRoomSubscription } from 'queries';
+import { GraphQLSubscription } from '@aws-amplify/api';
 
 function ChatNav({ setState, state, roomsList }) {
   const { chatSession, state: appState, setState: setAppState } = useApp();
@@ -25,13 +27,15 @@ function ChatNav({ setState, state, roomsList }) {
 
   useEffect(() => {
     async function subscribe() {
-      //@ts-ignore
-      (await API.graphql(graphqlOperation(onCreateRoom))).subscribe({
+      const subscription = (
+        await API.graphql<GraphQLSubscription<OnCreateRoomSubscription>>(graphqlOperation(onCreateRoom))
+      ).subscribe({
         next: ({ value }) => {
           setState(s => ({ ...s, roomsList: [...s.roomsList, value.data.onCreateRoom] }));
         }
       });
       scrollToBottom(messagesEndRef);
+      subscription.unsubscribe();
     }
 
     if (roomsList) {

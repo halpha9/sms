@@ -13,8 +13,8 @@ import { createMessage } from 'queries/mutations';
 import { useApp } from 'providers/chat';
 import { API } from 'aws-amplify';
 import { listMessagesForRoom, listRooms } from 'queries/queries';
-import { graphqlOperation } from '@aws-amplify/api';
-import { ListMessagesForRoomQuery, ListRoomsQuery } from 'queries';
+import { graphqlOperation, GraphQLQuery, GraphQLSubscription } from '@aws-amplify/api';
+import { ListMessagesForRoomQuery, ListRoomsQuery, OnCreateMessageByRoomIdSubscription } from 'queries';
 import { onCreateMessageByRoomId } from 'queries/subscriptions';
 import { useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -85,16 +85,18 @@ export default function ChatBox() {
 
   useEffect(() => {
     async function subscribe() {
-      //@ts-ignore
-      (await API.graphql(graphqlOperation(onCreateMessageByRoomId, { roomId: chatSession }))).subscribe({
+      const subscription = (
+        await API.graphql<GraphQLSubscription<OnCreateMessageByRoomIdSubscription>>(
+          graphqlOperation(onCreateMessageByRoomId, { roomId: chatSession })
+        )
+      ).subscribe({
         next: ({ value }) => {
           setMessages(messages => [...messages, value.data.onCreateMessageByRoomId]);
           scrollToBottom(messagesEndRef);
         }
-      }) as {
-        data: ListMessagesForRoomQuery;
-        errors: any[];
-      };
+      });
+
+      subscription.unsubscribe();
     }
     if (chatSession) {
       subscribe();
@@ -104,14 +106,12 @@ export default function ChatBox() {
   useEffect(() => {
     async function getMessages() {
       try {
-        const { data } = (await API.graphql(graphqlOperation(listMessagesForRoom, { roomId: chatSession }))) as {
-          data: ListMessagesForRoomQuery;
-          errors: any[];
-        };
-        const { data: roomData } = (await API.graphql(graphqlOperation(listRooms, { roomId: chatSession }))) as {
-          data: ListRoomsQuery;
-          errors: any[];
-        };
+        const { data } = await API.graphql<GraphQLQuery<ListMessagesForRoomQuery>>(
+          graphqlOperation(listMessagesForRoom, { roomId: chatSession })
+        );
+        const { data: roomData } = await API.graphql<GraphQLQuery<ListRoomsQuery>>(
+          graphqlOperation(listRooms, { roomId: chatSession })
+        );
         setRoom(roomData.listRooms.items[0]);
         setMessages(data.listMessagesForRoom.items);
       } catch (err) {

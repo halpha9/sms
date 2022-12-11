@@ -21,7 +21,7 @@ export interface SessionContextValue extends State {
   userData?: ExtendedUser;
   signUp: (username: string, password: string) => Promise<ISignUpResult | undefined>;
   signIn: (username: string, password: string) => Promise<{ [key: string]: string }>;
-  signOut: (navigation?: any) => Promise<void>;
+  signOut: () => Promise<void>;
   forgotPassword: (email: string) => Promise<any>;
   resetPassword: (email: string, code: string, password: string) => Promise<string>;
   updateAttributes: (user: CognitoUser, attributes: { [key: string]: string }) => Promise<string>;
@@ -177,10 +177,7 @@ function SP({ children }: SessionProps) {
   //   return null;
   // }
 
-  return (
-    // @ts-ignore
-    <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
-  );
+  return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 
 export const SessionProvider = SP;

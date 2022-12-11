@@ -18,6 +18,7 @@ import { listRooms } from 'queries/queries';
 import { ListRoomsQuery } from 'queries';
 import { format, parseISO } from 'date-fns';
 import { useApp } from 'providers/chat';
+import { GraphQLQuery } from '@aws-amplify/api';
 
 type Room = {
   __typename: 'Room';
@@ -46,10 +47,7 @@ function NavBar() {
   useEffect(() => {
     async function getMessages() {
       try {
-        const { data: roomData } = (await API.graphql(graphqlOperation(listRooms))) as {
-          data: ListRoomsQuery;
-          errors: any[];
-        };
+        const { data: roomData } = await API.graphql<GraphQLQuery<ListRoomsQuery>>(graphqlOperation(listRooms));
         setRooms(roomData.listRooms.items);
       } catch (err) {
         console.log(err);

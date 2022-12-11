@@ -8,18 +8,17 @@ import { useSession } from 'providers/session';
 import { useRouter } from 'next/router';
 import { onCreateRoom } from 'queries/subscriptions';
 import { scrollToBottom } from 'utils/page';
-import { ListRoomsQuery } from 'queries';
+import { OnCreateRoomSubscription, Room } from 'queries';
+import { GraphQLSubscription } from '@aws-amplify/api';
 
 export interface HomeState {
   showModal: boolean;
-  to: any;
-  roomsList: any;
+  roomsList: Room[];
 }
 
 const DashBoard = ({ roomsList }) => {
   const [state, setState] = useState<HomeState>({
     showModal: false,
-    to: null,
     roomsList
   });
 
@@ -30,16 +29,15 @@ const DashBoard = ({ roomsList }) => {
 
   useEffect(() => {
     async function subscribe() {
-      //@ts-ignore
-      (await API.graphql(graphqlOperation(onCreateRoom))).subscribe({
+      const subscription = (
+        await API.graphql<GraphQLSubscription<OnCreateRoomSubscription>>(graphqlOperation(onCreateRoom))
+      ).subscribe({
         next: ({ value }) => {
           setState(s => ({ ...s, roomsList: [...s.roomsList, value.data.onCreateRoom] }));
           scrollToBottom(roomsEndRef);
         }
-      }) as {
-        data: ListRoomsQuery;
-        errors: any[];
-      };
+      });
+      subscription.unsubscribe();
     }
     subscribe();
   }, []);
