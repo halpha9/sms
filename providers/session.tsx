@@ -104,6 +104,7 @@ function SP({ children }: SessionProps) {
         ...s,
         ...res.userData
       }));
+      setTimeout(() => (window.location.href = '/dashboard'), 500);
       return result;
     } catch (error) {
       console.log(error);

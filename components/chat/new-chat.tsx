@@ -1,8 +1,8 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import React, { Dispatch, SetStateAction } from 'react';
-import { HomeState } from 'pages';
 import { createRoom } from 'queries/mutations';
 import { API } from 'aws-amplify';
+import { HomeState } from 'pages/dashboard';
 
 const NewChatModal = ({ state, setState }: { state: HomeState; setState: Dispatch<SetStateAction<HomeState>> }) => {
   const [chatName, setChatName] = React.useState('');

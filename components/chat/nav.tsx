@@ -61,7 +61,7 @@ function ChatNav({ setState, state, roomsList }) {
         <div className="mt-5">
           <div className="flex flex-row items-center justify-center">
             <div className="flex items-center pb-3 text-xs font-semibold relative text-indigo-800 dark:text-slate-300">
-              <span>All Conversations</span>
+              <span>All Groups</span>
               <span className="dark:bg-slate-300 absolute left-0 bottom-0 h-1 w-full bg-indigo-800 rounded-full"></span>
             </div>
           </div>

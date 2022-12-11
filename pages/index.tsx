@@ -1,57 +1,25 @@
-import React, { useState } from 'react';
-import ChatBox from 'components/chat/box';
-import { withSSRContext } from 'aws-amplify';
-import { listRooms } from 'queries/queries';
-import ChatNav from 'components/chat/nav';
-import NewChatModal from 'components/chat/new-chat';
+import React from 'react';
+import { useSession } from 'providers/session';
+import { useRouter } from 'next/router';
+import dynamic from 'next/dynamic';
 
-export interface HomeState {
-  showModal: boolean;
-  to: any;
-  roomsList: any;
-}
+const Layout = dynamic(() => import('components/layout'));
 
-const Home = ({ roomsList }) => {
-  const [state, setState] = useState<HomeState>({
-    showModal: false,
-    to: null,
-    roomsList
-  });
+const Home = () => {
+  const router = useRouter();
+  const { user } = useSession();
+
+  if (!user) {
+    return router.replace('/sign-in');
+  } else if (user) {
+    return router.replace('/dashboard');
+  }
 
   return (
-    <div className="flex flex-row h-screen antialiased text-gray-800">
-      <ChatNav setState={setState} state={state} roomsList={roomsList} />
-      <ChatBox />
-      {state.showModal && <NewChatModal state={state} setState={setState} />}
-    </div>
+    <Layout>
+      <main className="h-screen flex-1 relative pb-24 z-0 overflow-y-auto bg-slate-800"></main>
+    </Layout>
   );
 };
 
 export default Home;
-
-export const getServerSideProps = async ({ req }) => {
-  const { API } = withSSRContext({ req });
-  try {
-    const { data } = await API.graphql({
-      query: listRooms,
-      authMode: 'AMAZON_COGNITO_USER_POOLS'
-    });
-
-    return {
-      props: {
-        roomsList: data.listRooms.items
-      }
-    };
-  } catch (err) {
-    console.log(err);
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false
-      },
-      props: {
-        authenticated: false
-      }
-    };
-  }
-};

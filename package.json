@@ -21,6 +21,8 @@
     "add": "^2.0.6",
     "aws-amplify": "^5.0.3",
     "aws-amplify-react": "^5.1.43",
+    "aws-appsync": "^4.1.9",
+    "aws-appsync-react": "^4.0.15",
     "aws-crt": "^1.14.8",
     "classnames": "^2.3.2",
     "date-fns": "^2.29.3",
