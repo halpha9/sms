@@ -3,9 +3,9 @@ import {
   PhotoIcon,
   PlusCircleIcon,
   MicrophoneIcon,
-  EllipsisVerticalIcon,
   ComputerDesktopIcon,
-  ChatBubbleLeftEllipsisIcon
+  ChatBubbleLeftEllipsisIcon,
+  ArrowLeftOnRectangleIcon
 } from '@heroicons/react/24/outline';
 import { useSession } from '../../providers/session';
 import React, { Fragment, useEffect, useState } from 'react';
@@ -20,6 +20,7 @@ import { useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { scrollToBottom } from 'utils/page';
 import { Menu, Transition } from '@headlessui/react';
+import classNames from 'classnames';
 
 type Room = {
   __typename: 'Room';
@@ -32,7 +33,7 @@ type Room = {
 export default function ChatBox() {
   type StateProps = string;
   const { user } = useSession();
-  const { chatSession } = useApp();
+  const { chatSession, setState: setAppState } = useApp();
   const [message, setMessage] = useState<StateProps>('');
   const [messages, setMessages] = useState([]);
   const [room, setRoom] = useState<Room>(null);
@@ -124,8 +125,13 @@ export default function ChatBox() {
   }, [chatSession]);
 
   return (
-    <div className="flex flex-col h-full w-full bg-white dark:bg-slate-700 px-4 py-6">
-      {messages && messages.length > 0 && (
+    <div
+      className={classNames(
+        chatSession ? 'md:flex' : 'hidden md:flex',
+        'flex flex-col h-full w-full bg-white dark:bg-slate-700 px-4 py-6'
+      )}
+    >
+      {chatSession && (
         <div className="flex flex-row items-center py-4 px-6 rounded-2xl shadow bg-gray-100 dark:bg-slate-800">
           {room && (
             <>
@@ -139,15 +145,12 @@ export default function ChatBox() {
             </>
           )}
           <div className="ml-auto">
-            <ul className="flex flex-row items-center space-x-2">
-              <li>
-                <div className="flex items-center justify-center bg-gray-200  dark:bg-slate-700 shadow text-gray-400 h-10 w-10 rounded-full">
-                  <span>
-                    <EllipsisVerticalIcon className="w-6 h-6" />
-                  </span>
-                </div>
-              </li>
-            </ul>
+            <div
+              onClick={() => setAppState(s => ({ ...s, chatSession: null }))}
+              className="cursor-pointer flex items-center justify-center bg-gray-200  dark:bg-slate-700 shadow text-gray-400 h-10 w-10 rounded-full"
+            >
+              <ArrowLeftOnRectangleIcon className="w-6 h-6" />
+            </div>
           </div>
         </div>
       )}
@@ -238,7 +241,7 @@ export default function ChatBox() {
                 onKeyDown={e => {
                   if (e.key === 'Enter') sendMessage();
                 }}
-                className="bg-white dark:bg-slate-700 dark:text-slate-300 px-8 rounded-lg border border-transparent w-full focus:outline-none text-sm h-10 flex items-center"
+                className="bg-white dark:bg-slate-700 dark:text-slate-300 px-2 md:px-8 rounded-lg border border-transparent w-full focus:outline-none text-sm h-10 flex items-center"
                 placeholder="Type your message...."
               />
             </div>

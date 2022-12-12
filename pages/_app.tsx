@@ -21,9 +21,9 @@ Amplify.configure({
     }
   },
   aws_project_region: process.env.NEXT_PUBLIC_COGNITO_REGION!,
-  aws_appsync_graphqlEndpoint: process.env.NEXT_APPSYNC_GRAPHQL_ENDPOINT!,
+  aws_appsync_graphqlEndpoint: process.env.NEXT_PUBLIC_APPSYNC_GRAPHQL_ENDPOINT!,
   aws_appsync_region: process.env.NEXT_PUBLIC_COGNITO_REGION!,
-  aws_appsync_authenticationType: process.env.NEXT_PUBLIC_APPSYNC_API_KEY!,
+  aws_appsync_authenticationType: process.env.NEXT_PUBLIC_APPSYNC_AUTHENTICATION_TYPE!,
   aws_appsync_apiKey: process.env.NEXT_PUBLIC_APPSYNC_API_KEY!,
   ssr: true
 });

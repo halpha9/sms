@@ -2,12 +2,14 @@ import React, { Dispatch, SetStateAction, createContext, useContext, useState } 
 
 interface State {
   chatSession: string;
+  showModal: boolean;
 }
 
 export interface AppContextValue extends State {}
 
 const initialState: State = {
-  chatSession: ''
+  chatSession: '',
+  showModal: false
 };
 
 const AppContext = createContext({

@@ -45,7 +45,7 @@ function NavBar() {
   };
 
   useEffect(() => {
-    async function getMessages() {
+    async function getRooms() {
       try {
         const { data: roomData } = await API.graphql<GraphQLQuery<ListRoomsQuery>>(graphqlOperation(listRooms));
         setRooms(roomData.listRooms.items);
@@ -53,7 +53,7 @@ function NavBar() {
         console.log(err);
       }
     }
-    getMessages();
+    getRooms();
   }, []);
 
   const moveToRoom = (room: string) => {
@@ -77,14 +77,14 @@ function NavBar() {
 
   return (
     <div className="w-full p-4 px-10 bg-gray-100 border-b border-gray-200 dark:border-slate-600 pb-5 dark:bg-slate-800 flex justify-between items-center">
-      <div className="flex-1">
+      <div className="flex-1 hidden md:flex">
         <Link href="/" passHref>
           <ChatBubbleLeftEllipsisIcon className="w-8 h-8 dark:text-slate-400 text-gray-400" />
         </Link>
       </div>
 
-      <div className="self-end flex items-center space-x-4">
-        <div className="w-96">
+      <div className="self-end flex-1 flex items-center space-x-4">
+        <div className="md:w-96 w-44">
           <Combobox value={selected} onChange={setSelected}>
             <div className="relative mt-1">
               <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
@@ -104,7 +104,7 @@ function NavBar() {
                 leaveTo="opacity-0"
                 afterLeave={() => setQuery('')}
               >
-                <Combobox.Options className="z-10 absolute right-0 mt-8 w-full origin-top-right divide-y dark:divide-slate-600 divide-gray-300 rounded-lg bg-white dark:bg-slate-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <Combobox.Options className="z-10 w-72 md:w-full absolute md:right-0 mt-8 origin-top-left md:origin-top-right divide-y dark:divide-slate-600 divide-gray-300 rounded-lg bg-white dark:bg-slate-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                   {filteredRooms && filteredRooms.length === 0 && query !== '' ? (
                     <div className="relative cursor-default select-none py-2 px-4 text-gray-700 dark:text-slate-400 text-sm">
                       Nothing found.
@@ -129,9 +129,13 @@ function NavBar() {
                             <span className="block truncate text-sm text-gray-400 dark:text-slate-300">
                               {room.name}
                             </span>
-                            <span className="block truncate text-xs text-gray-400 dark:text-slate-300">
+                            <span className="hidden md:block truncate text-xs text-gray-400 dark:text-slate-300">
                               <span className="font-medium text-gray-500 dark:text-slate-400">Started:</span>
                               {format(parseISO(room.createdAt), '	PPP')} at {format(parseISO(room.createdAt), 'p')}
+                            </span>
+                            <span className="md:hidden block truncate text-xs text-gray-400 dark:text-slate-300">
+                              <span className="font-medium text-gray-500 dark:text-slate-400">Started:</span>
+                              {format(parseISO(room.createdAt), '	dd/mm/yyy')} at {format(parseISO(room.createdAt), 'p')}
                             </span>
                             {selected ? (
                               <span
@@ -155,7 +159,7 @@ function NavBar() {
             </div>
           </Combobox>
         </div>
-        <div className="w-56 text-right">
+        <div className="w-full flex-1 text-right">
           <Menu as="div" className="relative inline-block text-left">
             <div>
               <Menu.Button className="rounded-full dark:bg-slate-400 bg-gray-300 border-2 border-gray-300 dark:border-none  w-10 h-10 flex justify-center items-center">

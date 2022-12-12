@@ -7,16 +7,17 @@ import { API, graphqlOperation } from 'aws-amplify';
 import { onCreateRoom } from 'queries/subscriptions';
 import { OnCreateRoomSubscription } from 'queries';
 import { GraphQLSubscription } from '@aws-amplify/api';
+import classNames from 'classnames';
 
-function ChatNav({ setState, state, roomsList }) {
-  const { chatSession, state: appState, setState: setAppState } = useApp();
+function ChatNav({ setState, roomsList }) {
+  const { chatSession, setState: setAppState } = useApp();
 
   const moveToRoom = (room: string) => {
     try {
       if (chatSession !== room) {
-        setAppState({ ...appState, chatSession: room });
+        setAppState(s => ({ ...s, chatSession: room }));
       } else {
-        setAppState({ ...appState, chatSession: '' });
+        setAppState(s => ({ ...s, chatSession: null }));
       }
     } catch (err) {
       console.log(err);
@@ -44,7 +45,12 @@ function ChatNav({ setState, state, roomsList }) {
   }, [roomsList]);
 
   return (
-    <div className="flex flex-row w-96 flex-shrink-0 bg-gray-100 dark:bg-slate-800 p-4">
+    <div
+      className={classNames(
+        chatSession ? 'hidden md:flex' : 'md:flex',
+        'flex-row w-96 flex-shrink-0 bg-gray-100 dark:bg-slate-800 p-4'
+      )}
+    >
       <div className="flex flex-col w-full h-full pl-4 pr-4 py-4 -mr-4">
         <div className="flex flex-row items-center">
           <div className="flex flex-row items-center">
@@ -55,7 +61,7 @@ function ChatNav({ setState, state, roomsList }) {
           </div>
           <div className="ml-auto">
             <button
-              onClick={() => setState(s => ({ ...s, showModal: true }))}
+              onClick={() => setAppState(s => ({ ...s, showModal: true }))}
               className="flex items-center justify-center h-7 w-7 bg-gray-200 dark:bg-transparent text-gray-500 rounded-full"
             >
               <PlusCircleIcon className="w-8 h-8 dark:text-slate-300" />

@@ -48,7 +48,7 @@ const DashBoard = ({ roomsList }) => {
 
   return (
     <div className="flex flex-row h-screen antialiased text-gray-800">
-      <ChatNav setState={setState} state={state} roomsList={state.roomsList} />
+      <ChatNav setState={setState} roomsList={state.roomsList} />
       <ChatBox />
       {state.showModal && <NewChatModal state={state} setState={setState} />}
     </div>
