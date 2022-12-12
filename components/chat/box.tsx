@@ -85,7 +85,7 @@ export default function ChatBox() {
 
   useEffect(() => {
     async function subscribe() {
-      const subscription = (
+      (
         await API.graphql<GraphQLSubscription<OnCreateMessageByRoomIdSubscription>>(
           graphqlOperation(onCreateMessageByRoomId, { roomId: chatSession })
         )
@@ -95,8 +95,6 @@ export default function ChatBox() {
           scrollToBottom(messagesEndRef);
         }
       });
-
-      subscription.unsubscribe();
     }
     if (chatSession) {
       subscribe();

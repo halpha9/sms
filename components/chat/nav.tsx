@@ -28,15 +28,12 @@ function ChatNav({ setState, roomsList }) {
 
   useEffect(() => {
     async function subscribe() {
-      const subscription = (
-        await API.graphql<GraphQLSubscription<OnCreateRoomSubscription>>(graphqlOperation(onCreateRoom))
-      ).subscribe({
+      (await API.graphql<GraphQLSubscription<OnCreateRoomSubscription>>(graphqlOperation(onCreateRoom))).subscribe({
         next: ({ value }) => {
           setState(s => ({ ...s, roomsList: [...s.roomsList, value.data.onCreateRoom] }));
         }
       });
       scrollToBottom(messagesEndRef);
-      subscription.unsubscribe();
     }
 
     if (roomsList) {
