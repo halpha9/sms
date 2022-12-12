@@ -51,7 +51,6 @@ export default function ChatBox() {
     }
 
     console.log('fileObj is', fileObj);
-
     // 👇️ reset file input
     event.target.value = null;
 
