@@ -151,7 +151,7 @@ const SignIn = () => {
             {errors.password && <span className="text-red-500 pt-2 text-sm block">Password is required</span>}
           </div>
         </form>
-        <div className="flex flex-col justify-center items-center mt-8">
+        <div className="flex flex-col justify-center items-center mt-8 space-y-4">
           <button
             onClick={handleSubmit(submit)}
             disabled={!isValid || state.loading}
@@ -163,7 +163,7 @@ const SignIn = () => {
           {!state.forgot && !state.reset && !state.register && (
             <p
               onClick={() => setState(s => ({ ...s, forgot: true }))}
-              className="dark:text-slate-200 text-gray-400 text-lg font-medium py-4"
+              className="dark:text-slate-200 text-gray-400 text-lg font-medium"
             >
               Reset Password
             </p>

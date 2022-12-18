@@ -4,8 +4,7 @@ import {
   ArrowLeftOnRectangleIcon,
   ArrowRightOnRectangleIcon,
   ChatBubbleLeftEllipsisIcon,
-  MoonIcon,
-  UserIcon
+  MoonIcon
 } from '@heroicons/react/24/outline';
 import { MoonIcon as MIcon, UserIcon as UIcon } from '@heroicons/react/24/solid';
 import { useSession } from '../providers/session';
@@ -176,7 +175,7 @@ function NavBar() {
               leaveTo="transform opacity-0 scale-95"
             >
               <Menu.Items className="z-10 absolute right-0 mt-2 w-56 origin-top-right divide-y dark:divide-slate-600 divide-gray-300 rounded-md bg-white dark:bg-slate-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                <div className="px-1 py-1 ">
+                {/* <div className="px-1 py-1 ">
                   <Link href="/profile" passHref>
                     <Menu.Item>
                       {({ active }) => (
@@ -197,7 +196,7 @@ function NavBar() {
                       )}
                     </Menu.Item>
                   </Link>
-                </div>
+                </div> */}
                 <div className="px-1 py-1">
                   <Menu.Item>
                     {({ active }) => (
